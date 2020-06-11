@@ -1,0 +1,30 @@
+{
+  "name": "kuma-demo",
+  "version": "0.1.0",
+  "description": "A simple counter application to demonstrate Kuma",
+  "author": "Marco Palladino <marco@konghq.com>",
+  "homepage": "https://kuma.io",
+  "dependencies": {
+    "express": "~4.17.1",
+    "ioredis": "~4.17.3"
+  },
+  "engines": {
+    "node": ">= 13.12.0"
+  },
+  "devDependencies": {},
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Kong/kuma-demo"
+  },
+  "scripts": {
+    "start": "node server.js"
+  },
+  "directories": {
+    "public": "./public"
+  },
+  "bugs": {
+    "url": "https://github.com/Kong/kuma-demo/issues",
+    "email": "marco@konghq.com"
+  }
+}

@@ -1,0 +1,71 @@
+<html>
+<head>
+  <title>Kuma Demo</title>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script type="text/javascript">
+    var interval;
+
+    function increment() {
+      $.post('/increment', function (data, textStatus, jqXHR) {
+        if (data.err == null) {
+          $("#counter").text(data.counter);
+        } else {
+          $("#counter").text("redis: cannot connect");
+        }
+      }).fail(function(){
+        $("#counter").text("app: cannot connect");
+      });
+    }
+
+    function stopAutoIncrement() {
+      clearInterval(interval);
+      $("#increment").prop("disabled", false);
+      $("#autoincrement").prop("checked", false);
+    }
+
+    $(document).ready(function() {
+      $.get('/counter', function (data, textStatus, jqXHR) {
+        $("#counter").text(data.counter);
+      });
+
+      $("#increment").click(function(){
+        increment();
+      });
+
+      var autoincrement = $("#autoincrement");
+      autoincrement.click(function(){
+        if (autoincrement.is(":checked")) {
+          $("#increment").prop("disabled", true);
+          interval = setInterval(function(){
+            increment();
+          }, 0);
+        } else {
+          stopAutoIncrement()
+        }
+      });
+    });
+  </script>
+  <style type="text/css">
+    body {
+      font-family: "Segoe UI",Arial,sans-serif;
+      text-align: center;
+      font-size: 24px;
+    }
+
+    #counter {
+      font-size: 200px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Welcome to the Kuma Demo</h1>
+  <div>
+    <span id="counter"></span>
+  </div>
+  <div>
+    <button id="increment">Increment</button>
+    <input type="checkbox" id="autoincrement" value="value"><label for="autoincrement">Auto-Increment</label>
+  </div>
+</body>
+</html>
+
