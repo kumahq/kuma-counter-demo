@@ -32,7 +32,9 @@ app.use('/', express.static('public'));
 app.post('/increment', function(req, res){
   var client = getClient();
   client.incr(KEY, function (err, result) {
+    client.quit();
     if (err) {
+      console.log(err);
       res.send({err:true});
     } else {
       res.send({counter: result, err: err});
@@ -43,7 +45,9 @@ app.post('/increment', function(req, res){
 app.get('/counter', function(req, res){
   var client = getClient();
   client.get(KEY, function(err, result) {
+    client.quit();
     if (err) {
+      console.log(err);
       res.send({err:true});
     } else {
       res.send({counter: result, err: err});
