@@ -4,16 +4,27 @@
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
   <script type="text/javascript">
     var interval;
+    var running = false;
 
     function increment() {
+      if (running) {
+        return;
+      }
+      running = true;
+      var counter = $("#counter")
       $.post('/increment', function (data, textStatus, jqXHR) {
         if (data.err == null) {
-          $("#counter").text(data.counter);
+          counter.removeClass("error");
+          counter.text(data.counter);
         } else {
-          $("#counter").text("redis: cannot connect");
+          counter.addClass("error");
+          counter.text("redis: cannot connect");
         }
+        running = false;
       }).fail(function(){
-        $("#counter").text("app: cannot connect");
+        counter.addClass("error");
+        counter.text("app: cannot connect");
+        running = false;
       });
     }
 
@@ -25,7 +36,11 @@
 
     $(document).ready(function() {
       $.get('/counter', function (data, textStatus, jqXHR) {
-        $("#counter").text(data.counter);
+        var text = data.counter
+        if (text == null) {
+          text = "0";
+        }
+        $("#counter").text(text);
       });
 
       $("#increment").click(function(){
@@ -49,22 +64,49 @@
     body {
       font-family: "Segoe UI",Arial,sans-serif;
       text-align: center;
-      font-size: 24px;
+      font-size: 16px;
+    }
+
+    #header {
+      padding: 50px;
+      background-color: #efefefef;
     }
 
     #counter {
       font-size: 200px;
+      text-shadow: 4px 4px #cccccc;
     }
+
+    .error {
+      color: red;
+      font-size: 100px !important;
+    }
+
+    #buttons {
+      #border: 1px solid #cccccc;
+      padding: 20px;
+      width: 400px;
+      margin: 0 auto;
+    }
+
+    #increment {
+      font-size: 20px;
+    }
+
   </style>
 </head>
 <body>
-  <h1>Welcome to the Kuma Demo</h1>
-  <div>
-    <span id="counter"></span>
+  <div id="header">
+    <h1>Kuma Counter Demo</h1>
+    <p>A simple application that increments a counter in a `Redis` service via a `Demo App` service:</p>
+    <br><br>
+    <div id="">
+      <button id="increment">Increment</button>
+      <input type="checkbox" id="autoincrement" value="value"><label style="position: relative; top: -1px;" for="autoincrement">Auto Increment</label>
+    </div>
   </div>
   <div>
-    <button id="increment">Increment</button>
-    <input type="checkbox" id="autoincrement" value="value"><label for="autoincrement">Auto-Increment</label>
+    <span id="counter"></span>
   </div>
 </body>
 </html>
