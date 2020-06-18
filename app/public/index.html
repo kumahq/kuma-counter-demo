@@ -35,6 +35,12 @@
     }
 
     $(document).ready(function() {
+      $.get('/version', function (data, textStatus, jqXHR) {
+        $("#header").css("background-color", data.color);
+        $("#version").text(data.version);
+        $("#loading").remove();
+        $("#content").removeClass("hide");
+      });
       $.get('/counter', function (data, textStatus, jqXHR) {
         var text = data.counter
         if (text == null) {
@@ -65,11 +71,12 @@
       font-family: "Segoe UI",Arial,sans-serif;
       text-align: center;
       font-size: 16px;
+      margin:0;
     }
 
     #header {
       padding: 50px;
-      background-color: #efefefef;
+      background-color: #efefef;
     }
 
     #counter {
@@ -93,20 +100,39 @@
       font-size: 20px;
     }
 
+    .center {
+      position: absolute;
+      width: 200px;
+      height: 50px;
+      top: 50%;
+      left: 50%;
+      margin-left: -50px; /* margin is -0.5 * dimension */
+      margin-top: -25px; 
+    }​
+
+    .hide {
+      display: none !important;
+    }
+
   </style>
 </head>
 <body>
-  <div id="header">
-    <h1>Kuma Counter Demo</h1>
-    <p>A simple application that increments a counter in a `Redis` service via a `Demo App` service:</p>
-    <br><br>
-    <div id="">
-      <button id="increment">Increment</button>
-      <input type="checkbox" id="autoincrement" value="value"><label style="position: relative; top: -1px;" for="autoincrement">Auto Increment</label>
-    </div>
+  <div id="loading" class="center">
+    Loading...
   </div>
-  <div>
-    <span id="counter"></span>
+  <div id="content" class="hide">
+    <div id="header">
+      <h1>Kuma Counter Demo <span id="version"></span></h1>
+      <p>A simple application that increments a counter in a `Redis` service via a `Demo App` service:</p>
+      <br><br>
+      <div id="">
+        <button id="increment">Increment</button>
+        <input type="checkbox" id="autoincrement" value="value"><label style="position: relative; top: -1px;" for="autoincrement">Auto Increment</label>
+      </div>
+    </div>
+    <div>
+      <span id="counter"></span>
+    </div>
   </div>
 </body>
 </html>

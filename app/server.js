@@ -5,6 +5,9 @@ const KEY = "counter"
 const app = express();
 const PORT = 5000;
 
+var version = process.env.APP_VERSION || "1.0";
+var color = process.env.APP_COLOR || "#efefef";
+
 function getClient() {
   var client = new Redis({
     port: parseInt(process.env.REDIS_PORT) || 6379,
@@ -52,6 +55,13 @@ app.get('/counter', function(req, res){
     } else {
       res.send({counter: result, err: err});
     }
+  });
+});
+
+app.get('/version', function(req, res) {
+  res.send({
+    version: version,
+    color: color
   });
 });
 

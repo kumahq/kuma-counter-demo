@@ -62,6 +62,10 @@ spec:
               value: "redis.kuma-demo.svc.cluster.local"
             - name: REDIS_PORT
               value: "6379"
+            - name: APP_VERSION
+              value: "1.0"
+            - name: APP_COLOR
+              value: "#efefefef"
           ports:
             - name: http
               containerPort: 5000
