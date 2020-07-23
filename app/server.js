@@ -9,9 +9,12 @@ var version = process.env.APP_VERSION || "1.0";
 var color = process.env.APP_COLOR || "#efefef";
 
 function getClient() {
+  var host = process.env.REDIS_HOST || "127.0.0.1";
+  var port = parseInt(process.env.REDIS_PORT) || 6379;
+  console.log("Connecting to Redis at %s:%d", host, port);
   var client = new Redis({
-    port: parseInt(process.env.REDIS_PORT) || 6379,
-    host: process.env.REDIS_HOST || "127.0.0.1",
+    port: port,
+    host: host,
     family: 4,
     autoResendUnfulfilledCommands: false,
     autoResubscribe: false,
