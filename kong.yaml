@@ -1,10 +1,10 @@
 # Install Kong
 
-kubectl apply -f https://bit.ly/k4k8s
+$ kubectl apply -f https://bit.ly/k4k8s
 
 # Add Label to NS
 
-$ kubectl label ns kong kuma.io/sidecar-injection=enabled
+$ kubectl annotate ns kong kuma.io/sidecar-injection=enabled
 
 # Trigger sidecar
 
