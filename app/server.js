@@ -1,7 +1,8 @@
 const express = require('express')
 const Redis = require("ioredis");
 
-const KEY = "counter"
+const COUNTER_KEY = "counter"
+const ZONE_KEY = "zone"
 const app = express();
 const PORT = 5000;
 
@@ -37,26 +38,46 @@ app.use('/', express.static('public'));
 
 app.post('/increment', function(req, res){
   var client = getClient();
-  client.incr(KEY, function (err, result) {
-    client.quit();
+  client.incr(COUNTER_KEY, function (err, counter_result) {
     if (err) {
       console.log(err);
       res.send({err:true});
     } else {
-      res.send({counter: result, err: err});
+      client.get(ZONE_KEY, function(err, zone_result) {
+        client.quit();
+        if (err) {
+          console.log(err);
+          res.send({err:true});
+        } else {
+          if (counter_result == null) {
+            counter_result = 0;
+          }
+          res.send({counter: counter_result, zone: zone_result, err: err});
+        }
+      });
     }
   });
 });
 
 app.get('/counter', function(req, res){
   var client = getClient();
-  client.get(KEY, function(err, result) {
-    client.quit();
+  client.get(COUNTER_KEY, function(err, counter_result) {
     if (err) {
       console.log(err);
       res.send({err:true});
     } else {
-      res.send({counter: result, err: err});
+      client.get(ZONE_KEY, function(err, zone_result) {
+        client.quit();
+        if (err) {
+          console.log(err);
+          res.send({err:true});
+        } else {
+          if (counter_result == null) {
+            counter_result = 0;
+          }
+          res.send({counter: counter_result, zone: zone_result, err: err});
+        }
+      });
     }
   });
 });

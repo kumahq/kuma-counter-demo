@@ -26,6 +26,10 @@ spec:
           ports:
             - name: tcp
               containerPort: 6379
+          lifecycle:
+            postStart:
+              exec:
+                command: ["/usr/local/bin/redis-cli", "set", "zone", "local"]
 ---
 apiVersion: v1
 kind: Service

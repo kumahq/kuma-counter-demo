@@ -15,7 +15,7 @@
       $.post('/increment', function (data, textStatus, jqXHR) {
         if (data.err == null) {
           counter.removeClass("error");
-          counter.text(data.counter);
+          counter.text(data.zone + ": " + data.counter);
         } else {
           counter.addClass("error");
           counter.text("redis: cannot connect");
@@ -42,7 +42,7 @@
         $("#content").removeClass("hide");
       });
       $.get('/counter', function (data, textStatus, jqXHR) {
-        var text = data.counter
+        var text = data.zone + ": " + data.counter
         if (text == null) {
           text = "0";
         }
