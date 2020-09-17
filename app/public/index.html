@@ -6,11 +6,11 @@
     var interval;
     var running = false;
 
-    var status;
-    var zone;
-    var counter;
-
     function increment() {
+      var status = $("#status");
+      var zone = $("#zone");
+      var counter = $("#counter");
+      
       if (running) {
         return;
       }
@@ -43,9 +43,9 @@
     }
 
     $(document).ready(function() {
-      status = $("#status");
-      zone = $("#zone");
-      counter = $("#counter");
+      var status = $("#status");
+      var zone = $("#zone");
+      var counter = $("#counter");
 
       $.get('/version', function (data, textStatus, jqXHR) {
         $("#header").css("background-color", data.color);
@@ -54,17 +54,17 @@
         $("#content").removeClass("hide");
       });
       $.get('/counter', function (data, textStatus, jqXHR) {
-        var counter;
-        var zone;
+        var counterVal;
+        var zoneVal;
         if (data == null) {
-          counter = "0";
-          zone = "local";
+          counterVal = "0";
         } else {
-          counter = data.counter;
-          zone = data.zone;
+          counterVal = data.counter;
+          zoneVal = data.zone;
         }
-        counter.text(counter);
-        zone.text(zone);
+        console.log(data);
+        counter.text(counterVal);
+        zone.text(zoneVal);
       });
 
       $("#increment").click(function(){
@@ -98,6 +98,11 @@
     }
 
     #counter {
+      font-size: 200px;
+      text-shadow: 4px 4px #cccccc;
+    }
+
+    #zone {
       font-size: 200px;
       text-shadow: 4px 4px #cccccc;
     }
