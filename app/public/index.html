@@ -6,24 +6,32 @@
     var interval;
     var running = false;
 
+    var status;
+    var zone;
+    var counter;
+
     function increment() {
       if (running) {
         return;
       }
       running = true;
-      var counter = $("#counter")
+      
       $.post('/increment', function (data, textStatus, jqXHR) {
         if (data.err == null) {
-          counter.removeClass("error");
-          counter.text(data.zone + ": " + data.counter);
+          status.removeClass("error");
+          status.text("Everything is working")
+          counter.text(data.counter);
+          zone.text(data.zone);
         } else {
-          counter.addClass("error");
-          counter.text("redis: cannot connect");
+          status.addClass("error");
+          status.text("Cannot connect to: redis")
+          counter.text("-");
+          zone.text("-");
         }
         running = false;
       }).fail(function(){
-        counter.addClass("error");
-        counter.text("app: cannot connect");
+        status.addClass("error");
+        status.text("Cannot connect to: demo-app")
         running = false;
       });
     }
@@ -35,6 +43,10 @@
     }
 
     $(document).ready(function() {
+      status = $("#status");
+      zone = $("#zone");
+      counter = $("#counter");
+
       $.get('/version', function (data, textStatus, jqXHR) {
         $("#header").css("background-color", data.color);
         $("#version").text(data.version);
@@ -42,11 +54,17 @@
         $("#content").removeClass("hide");
       });
       $.get('/counter', function (data, textStatus, jqXHR) {
-        var text = data.zone + ": " + data.counter
-        if (text == null) {
-          text = "0";
+        var counter;
+        var zone;
+        if (data == null) {
+          counter = "0";
+          zone = "local";
+        } else {
+          counter = data.counter;
+          zone = data.zone;
         }
-        $("#counter").text(text);
+        counter.text(counter);
+        zone.text(zone);
       });
 
       $("#increment").click(function(){
@@ -131,6 +149,8 @@
       </div>
     </div>
     <div>
+      <span id="status"></span>
+      <span id="zone"></span>
       <span id="counter"></span>
     </div>
   </div>
