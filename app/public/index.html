@@ -211,6 +211,10 @@
       display: none !important;
     }
 
+    .content {
+      position: relative;
+    }
+
     .inner {
       max-width: 1300px;
       margin-left: auto;
@@ -220,7 +224,7 @@
     .columns {
       display: flex;
       max-width: 1300px;
-      margin: 0 auto;
+      margin: 20px auto;
       text-align: left;
     }
 
@@ -230,8 +234,22 @@
       padding: 50px;
     }
 
-    .info {
+    /* make sure to place your content above the pseudo element! */
+    .info > * {
+      position: relative;
+      z-index: 1;
+    }
 
+    /* hacky background 50% column trick */
+    .info::after {
+      position: absolute;
+      top: 0;
+      left: 0;
+      display: block;
+      content: "";
+      width: 50vw;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.025);
     }
 
     .controls-container {
@@ -301,10 +319,22 @@
       margin-right: 10px;
     }
 
+    footer {
+      background: #fff;
+    }
+
+    @media (min-height: 775px) {
+      footer {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+      }
+    }
+
     footer > .inner {
       text-align: center;
       padding: 30px;
-      margin: 30px auto;
       border-top: 1px solid #eee;
     }
 
