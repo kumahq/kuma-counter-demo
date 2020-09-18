@@ -143,13 +143,46 @@
     }
 
     h1, h2, h3, h4, h5, h6, p {
-      margin: 0 0 10px 0;
+      margin: 0 0 20px 0;
     }
 
     ul {
       list-style: none;
       margin: 0;
       padding: 0;
+    }
+
+    img {
+      max-width: 100%;
+      height: auto;
+    }
+
+    a {
+      color: #1456cb;
+    }
+
+    .diagram {
+      display: block;
+      margin: 30px auto;
+      text-align: center;
+    }
+
+    .button {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      padding: 8px 12px;
+      font-size: 16px;
+      font-weight: 400;
+      line-height: 1.25;
+      text-decoration: none;
+      vertical-align: middle;
+      color: #fff;
+      border: 1px solid transparent;
+      border-radius: 3px;
+      transition: all .2s ease-in-out;
+      cursor: pointer;
+      background: #1456cb;
     }
 
     #status {
@@ -170,6 +203,12 @@
       display: none !important;
     }
 
+    .inner {
+      max-width: 1300px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
     .columns {
       display: flex;
       max-width: 1300px;
@@ -180,7 +219,7 @@
     .columns > div {
       flex: 1;
       flex-basis: 50%;
-      padding: 30px;
+      padding: 50px;
     }
 
     .info {
@@ -196,10 +235,34 @@
       align-items: center;
       justify-content: center;
       text-align: center;
+      margin: 0 0 30px 0;
+      padding: 0 0 30px 0;
+      border-bottom: 1px solid #eee;
     }
 
     .controls > div {
       padding: 10px;
+    }
+
+    .icon {
+      display: inline-block;
+      width: 32px;
+      height: auto;
+      margin: 0 5px;
+    }
+
+    .icon-button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 5px;
+      background: #eee;
+      padding: 10px 20px;
+      margin: 10px 0;
+    }
+
+    .icon-button img {
+      margin-right: 10px;
     }
 
     .tile {
@@ -212,21 +275,32 @@
     }
 
     .tile h3 {
-      font-size: 20px;
+      font-size: 24px;
       font-weight: normal;
       color: rgba(0, 0, 0, 0.45);
     }
 
     .tile p {
       font-weight: 400;
-      font-size: 28px;
+      font-size: 32px;
       color: rgba(0, 0, 0, 0.75);
     }
 
-    .type-lg { font-size: 18px; }
-    .type-xl { font-size: 22px; }
-    .type-xxl { font-size: 28px; }
-    .type-xxxl { font-size: 32px; }
+    footer > .inner {
+      text-align: center;
+      padding: 30px;
+      margin: 30px auto;
+      border-top: 1px solid #eee;
+    }
+
+    footer p {
+      margin: 0 0 10px 0;
+    }
+
+    .type-lg { font-size: 18px !important; }
+    .type-xl { font-size: 22px !important; }
+    .type-xxl { font-size: 28px !important; }
+    .type-xxxl { font-size: 32px !important; }
 
   </style>
 </head>
@@ -238,7 +312,7 @@
 
     <div class="columns">
       <div class="info">
-        <h1>Kuma Counter Demo <span id="version"></span></h1>
+        <h1 class="type-xxxl">Kuma Counter Demo <span id="version"></span></h1>
         <p class="type-xl">
           Welcome to a simple demo application to demonstrate how the Kuma service mesh works. This application allows us
           to increment a counter, and it is made of two different services:
@@ -247,15 +321,18 @@
           <li><strong>demo-app:</strong> To serve the backend API and this frontend</li>
           <li><strong>redis:</strong> To store the counter value</li>
         </ul>
+        <p>
+          <img class="diagram" src="./demo-app-diagram.png" alt="Kuma Counter Demo App diagram">
+        </p>
       </div>
       <div class="controls-container">
         <div class="controls">
           <div>
-            <button id="increment">Increment</button>
+            <button id="increment" class="button type-xxxl">Increment</button>
           </div>
           <div>
             <input type="checkbox" id="autoincrement" value="value">
-            <label for="autoincrement">Auto Increment</label>
+            <label for="autoincrement" class="type-xl">Auto Increment</label>
           </div>
         </div>
 
@@ -279,6 +356,20 @@
         </div>
       </div>
     </div>
+
+    <footer>
+      <div class="inner">
+        <p>
+          You can find the source code for this demo at
+        </p>
+        <p>
+          <a href="https://github.com/subnetmarco/kuma-demo/" class="icon-button" target="_blank">
+            <img src="./github.svg" alt="GitHub logo" class="icon">
+            <span>https://github.com/subnetmarco/kuma-demo/</span>
+          </a>
+        </p>
+      </div>
+    </footer>
 
     <!-- <div id="header">
       <h1>Kuma Counter Demo <span id="version"></span></h1>
