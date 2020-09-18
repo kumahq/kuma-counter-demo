@@ -21,7 +21,11 @@
           status.removeClass("error");
           status.text("Everything is working")
           counter.text(data.counter);
-          zone.text(data.zone);
+          var zoneVal = data.zone;
+          if (zoneVal == null) {
+            zoneVal = "unknown";
+          }
+          zone.text(zoneVal);
         } else {
           status.addClass("error");
           status.text("Cannot connect to: redis")
@@ -58,9 +62,13 @@
         var zoneVal;
         if (data == null) {
           counterVal = "0";
+          zoneVal = "unknown";
         } else {
           counterVal = data.counter;
           zoneVal = data.zone;
+          if (zoneVal == null) {
+            zoneVal = "unknown";
+          }
         }
         console.log(data);
         counter.text(counterVal);
@@ -283,7 +291,7 @@
 
     .tile p {
       font-weight: 400;
-      font-size: 80px;
+      font-size: 50px;
       color: rgba(0, 0, 0, 0.75);
       margin: 0;
     }
