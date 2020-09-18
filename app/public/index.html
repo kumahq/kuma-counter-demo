@@ -7,23 +7,35 @@
     var running = false;
 
     function increment() {
+      var status = $("#status");
+      var zone = $("#zone");
+      var counter = $("#counter");
+      
       if (running) {
         return;
       }
       running = true;
-      var counter = $("#counter")
+      
       $.post('/increment', function (data, textStatus, jqXHR) {
         if (data.err == null) {
-          counter.removeClass("error");
-          counter.text(data.zone + ": " + data.counter);
+          status.removeClass("error");
+          status.text("Everything is working")
+          counter.text(data.counter);
+          var zoneVal = data.zone;
+          if (zoneVal == null) {
+            zoneVal = "unknown";
+          }
+          zone.text(zoneVal);
         } else {
-          counter.addClass("error");
-          counter.text("redis: cannot connect");
+          status.addClass("error");
+          status.text("Cannot connect to: redis")
+          counter.text("-");
+          zone.text("-");
         }
         running = false;
       }).fail(function(){
-        counter.addClass("error");
-        counter.text("app: cannot connect");
+        status.addClass("error");
+        status.text("Cannot connect to: demo-app")
         running = false;
       });
     }
@@ -35,6 +47,10 @@
     }
 
     $(document).ready(function() {
+      var status = $("#status");
+      var zone = $("#zone");
+      var counter = $("#counter");
+
       $.get('/version', function (data, textStatus, jqXHR) {
         $("#header").css("background-color", data.color);
         $("#version").text(data.version);
@@ -42,11 +58,21 @@
         $("#content").removeClass("hide");
       });
       $.get('/counter', function (data, textStatus, jqXHR) {
-        var text = data.zone + ": " + data.counter
-        if (text == null) {
-          text = "0";
+        var counterVal;
+        var zoneVal;
+        if (data == null) {
+          counterVal = "0";
+          zoneVal = "unknown";
+        } else {
+          counterVal = data.counter;
+          zoneVal = data.zone;
+          if (zoneVal == null) {
+            zoneVal = "unknown";
+          }
         }
-        $("#counter").text(text);
+        console.log(data);
+        counter.text(counterVal);
+        zone.text(zoneVal);
       });
 
       $("#increment").click(function(){
@@ -67,6 +93,11 @@
     });
   </script>
   <style type="text/css">
+    *, *:before, *:after {
+      box-sizing: border-box;
+      margin: 0;
+    }
+
     body {
       font-family: "Segoe UI",Arial,sans-serif;
       text-align: center;
@@ -80,17 +111,22 @@
     }
 
     #counter {
-      font-size: 200px;
-      text-shadow: 4px 4px #cccccc;
+      /* font-size: 200px; */
+      /* text-shadow: 4px 4px #cccccc; */
+    }
+
+    #zone {
+      /* font-size: 200px; */
+      /* text-shadow: 4px 4px #cccccc; */
     }
 
     .error {
-      color: red;
-      font-size: 100px !important;
+      /* color: red; */
+      /* font-size: 100px !important; */
     }
 
     #buttons {
-      #border: 1px solid #cccccc;
+      border: 1px solid #cccccc;
       padding: 20px;
       width: 400px;
       margin: 0 auto;
@@ -114,6 +150,203 @@
       display: none !important;
     }
 
+    h1, h2, h3, h4, h5, h6, p {
+      margin: 0 0 20px 0;
+    }
+
+    ul {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+
+    img {
+      max-width: 100%;
+      height: auto;
+    }
+
+    a {
+      color: #1456cb;
+    }
+
+    .diagram {
+      display: block;
+      margin: 30px auto;
+      text-align: center;
+    }
+
+    .button {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      padding: 8px 12px;
+      font-size: 16px;
+      font-weight: 400;
+      line-height: 1.25;
+      text-decoration: none;
+      vertical-align: middle;
+      color: #fff;
+      border: 1px solid transparent;
+      border-radius: 3px;
+      transition: all .2s ease-in-out;
+      cursor: pointer;
+      background: #1456cb;
+    }
+
+    #status {
+      display: block;
+      border-radius: 5px;
+      padding: 10px;
+      margin: 20px auto;
+      background: #82d9a6;
+      font-size: 20px;
+      font-weight: bold;
+    }
+
+    #status.error {
+      background: #ffb3bf;
+    }
+
+    #status:empty {
+      display: none !important;
+    }
+
+    .content {
+      position: relative;
+    }
+
+    .inner {
+      max-width: 1300px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .columns {
+      display: flex;
+      max-width: 1300px;
+      margin: 20px auto;
+      text-align: left;
+    }
+
+    .columns > div {
+      flex: 1;
+      flex-basis: 50%;
+      padding: 50px;
+    }
+
+    /* make sure to place your content above the pseudo element! */
+    .info > * {
+      position: relative;
+      z-index: 1;
+    }
+
+    /* hacky background 50% column trick */
+    .info::after {
+      position: absolute;
+      top: 0;
+      left: 0;
+      display: block;
+      content: "";
+      width: 50vw;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.025);
+    }
+
+    .controls-container {
+      
+    }
+
+    .controls {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      margin: 0 0 30px 0;
+      padding: 0 0 30px 0;
+      border-bottom: 1px solid #eee;
+    }
+
+    .controls > div {
+      padding: 10px;
+    }
+
+    .icon {
+      display: inline-block;
+      width: 32px;
+      height: auto;
+      margin: 0 5px;
+    }
+
+    .icon-button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 5px;
+      background: #eee;
+      padding: 10px 20px;
+      margin: 10px 0;
+    }
+
+    .icon-button img {
+      margin-right: 10px;
+    }
+
+    .tile {
+      text-align: left;
+      border-left: 3px solid;
+      border-left-color: rgba(0, 0, 0, 0.1);
+      background-color: rgba(150, 58, 133, 0.05);
+      padding: 16px 26px;
+      margin: 0 0 20px 0;
+    }
+
+    .tile h3 {
+      font-size: 24px;
+      font-weight: normal;
+      color: rgba(0, 0, 0, 0.45);
+      margin: 0 0 10px 0;
+    }
+
+    .tile p {
+      font-weight: 400;
+      font-size: 50px;
+      color: rgba(0, 0, 0, 0.75);
+      margin: 0;
+    }
+
+    input[type=checkbox] {
+      display: inline-block;
+      margin-right: 10px;
+    }
+
+    footer {
+      background: #fff;
+      border-top: 1px solid #eee;
+    }
+
+    @media (min-height: 775px) {
+      footer {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+      }
+    }
+
+    footer > .inner {
+      text-align: center;
+      padding: 30px;
+    }
+
+    footer p {
+      margin: 0 0 10px 0;
+    }
+
+    .type-lg { font-size: 18px !important; }
+    .type-xl { font-size: 22px !important; }
+    .type-xxl { font-size: 28px !important; }
+    .type-xxxl { font-size: 32px !important; }
+
   </style>
 </head>
 <body>
@@ -121,7 +354,69 @@
     Loading...
   </div>
   <div id="content" class="hide">
-    <div id="header">
+
+    <div class="columns">
+      <div class="info">
+        <h1 class="type-xxxl">Kuma Counter Demo <span id="version"></span></h1>
+        <p class="type-xl">
+          Welcome to a simple demo application to demonstrate how the Kuma service mesh works. This application allows us
+          to increment a counter, and it is made of two different services:
+        </p>
+        <ul class="type-xl">
+          <li><strong>demo-app:</strong> To serve the backend API and this frontend</li>
+          <li><strong>redis:</strong> To store the counter value</li>
+        </ul>
+        <p>
+          <img class="diagram" src="./demo-app-diagram.png" alt="Kuma Counter Demo App diagram">
+        </p>
+      </div>
+      <div class="controls-container">
+        <div class="controls">
+          <div>
+            <button id="increment" class="button type-xxxl">Increment</button>
+          </div>
+          <div>
+            <input type="checkbox" id="autoincrement" value="value">
+            <label for="autoincrement" class="type-xl">Auto Increment</label>
+          </div>
+        </div>
+
+        <div class="output">
+          <span id="status"></span>
+          
+          <div class="tile">
+            <h3>Counter</h3>
+            <p>
+              <span id="counter"></span>
+            </p>
+          </div>
+
+          <div class="tile">
+            <h3>Zone</h3>
+            <p>
+              <span id="zone"></span>
+            </p>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <footer>
+      <div class="inner">
+        <p>
+          You can find the source code for this demo at
+        </p>
+        <p>
+          <a href="https://github.com/subnetmarco/kuma-demo/" class="icon-button" target="_blank">
+            <img src="./github.svg" alt="GitHub logo" class="icon">
+            <span>https://github.com/subnetmarco/kuma-demo/</span>
+          </a>
+        </p>
+      </div>
+    </footer>
+
+    <!-- <div id="header">
       <h1>Kuma Counter Demo <span id="version"></span></h1>
       <p>A simple application that increments a counter in a `Redis` service via a `Demo App` service:</p>
       <br><br>
@@ -131,8 +426,10 @@
       </div>
     </div>
     <div>
+      <span id="status"></span>
+      <span id="zone"></span>
       <span id="counter"></span>
-    </div>
+    </div> -->
   </div>
 </body>
 </html>
