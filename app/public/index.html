@@ -85,6 +85,11 @@
     });
   </script>
   <style type="text/css">
+    *, *:before, *:after {
+      box-sizing: border-box;
+      margin: 0;
+    }
+
     body {
       font-family: "Segoe UI",Arial,sans-serif;
       text-align: center;
@@ -98,8 +103,8 @@
     }
 
     #counter {
-      font-size: 200px;
-      text-shadow: 4px 4px #cccccc;
+      /* font-size: 200px; */
+      /* text-shadow: 4px 4px #cccccc; */
     }
 
     #zone {
@@ -108,12 +113,12 @@
     }
 
     .error {
-      color: red;
-      font-size: 100px !important;
+      /* color: red; */
+      /* font-size: 100px !important; */
     }
 
     #buttons {
-      #border: 1px solid #cccccc;
+      border: 1px solid #cccccc;
       padding: 20px;
       width: 400px;
       margin: 0 auto;
@@ -137,6 +142,77 @@
       display: none !important;
     }
 
+    h1, h2, h3, h4, h5, h6, p {
+      margin: 0 0 10px 0;
+    }
+
+    #status {
+      display: block;
+      border-radius: 5px;
+      padding: 10px;
+      margin: 20px auto;
+      background: #82d9a6;
+      font-size: 20px;
+      font-weight: bold;
+    }
+
+    #status.error {
+      background: #ffb3bf;
+    }
+
+    #status:empty {
+      display: none !important;
+    }
+
+    .columns {
+      display: flex;
+      max-width: 1246px;
+      margin: 0 auto;
+      text-align: left;
+    }
+
+    .columns > div {
+      flex: 1;
+      flex-basis: 50%;
+      padding: 10px;
+    }
+
+    .controls-container {
+      
+    }
+
+    .controls {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+    }
+
+    .controls > div {
+      padding: 10px;
+    }
+
+    .tile {
+      text-align: left;
+      border-left: 3px solid;
+      border-left-color: rgba(0, 0, 0, 0.1);
+      background-color: rgba(150, 58, 133, 0.05);
+      padding: 16px 26px;
+      margin: 0 0 20px 0;
+    }
+
+    .tile h3 {
+      font-size: 20px;
+      font-weight: normal;
+      color: rgba(0, 0, 0, 0.45);
+    }
+
+    .tile p {
+      font-weight: 400;
+      font-size: 28px;
+      color: rgba(0, 0, 0, 0.75);
+    }
+
   </style>
 </head>
 <body>
@@ -144,7 +220,52 @@
     Loading...
   </div>
   <div id="content" class="hide">
-    <div id="header">
+
+    <div class="columns">
+      <div>
+        <h1>Kuma Counter Demo <span id="version"></span></h1>
+        <p class="type-lg">
+          Welcome to a simple demo application to demonstrate how the Kuma service mesh works. This application allows us
+          to increment a counter, and it is made of two different services:
+        </p>
+        <ul class="type-lg">
+          <li><strong>demo-app:</strong> To serve the backend API and this frontend</li>
+          <li><strong>redis:</strong> To store the counter value</li>
+        </ul>
+      </div>
+      <div class="controls-container">
+        <div class="controls">
+          <div>
+            <button id="increment">Increment</button>
+          </div>
+          <div>
+            <input type="checkbox" id="autoincrement" value="value">
+            <label for="autoincrement">Auto Increment</label>
+          </div>
+        </div>
+
+        <div class="output">
+          <span id="status"></span>
+          
+          <div class="tile">
+            <h3>Counter</h3>
+            <p>
+              <span id="counter"></span>
+            </p>
+          </div>
+
+          <div class="tile">
+            <h3>Region</h3>
+            <p>
+              <span id="zone"></span>
+            </p>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- <div id="header">
       <h1>Kuma Counter Demo <span id="version"></span></h1>
       <p>A simple application that increments a counter in a `Redis` service via a `Demo App` service:</p>
       <br><br>
@@ -157,7 +278,7 @@
       <span id="status"></span>
       <span id="zone"></span>
       <span id="counter"></span>
-    </div>
+    </div> -->
   </div>
 </body>
 </html>
