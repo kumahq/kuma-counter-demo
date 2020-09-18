@@ -146,6 +146,12 @@
       margin: 0 0 10px 0;
     }
 
+    ul {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+
     #status {
       display: block;
       border-radius: 5px;
@@ -166,7 +172,7 @@
 
     .columns {
       display: flex;
-      max-width: 1246px;
+      max-width: 1300px;
       margin: 0 auto;
       text-align: left;
     }
@@ -174,7 +180,11 @@
     .columns > div {
       flex: 1;
       flex-basis: 50%;
-      padding: 10px;
+      padding: 30px;
+    }
+
+    .info {
+
     }
 
     .controls-container {
@@ -213,6 +223,11 @@
       color: rgba(0, 0, 0, 0.75);
     }
 
+    .type-lg { font-size: 18px; }
+    .type-xl { font-size: 22px; }
+    .type-xxl { font-size: 28px; }
+    .type-xxxl { font-size: 32px; }
+
   </style>
 </head>
 <body>
@@ -222,13 +237,13 @@
   <div id="content" class="hide">
 
     <div class="columns">
-      <div>
+      <div class="info">
         <h1>Kuma Counter Demo <span id="version"></span></h1>
-        <p class="type-lg">
+        <p class="type-xl">
           Welcome to a simple demo application to demonstrate how the Kuma service mesh works. This application allows us
           to increment a counter, and it is made of two different services:
         </p>
-        <ul class="type-lg">
+        <ul class="type-xl">
           <li><strong>demo-app:</strong> To serve the backend API and this frontend</li>
           <li><strong>redis:</strong> To store the counter value</li>
         </ul>
