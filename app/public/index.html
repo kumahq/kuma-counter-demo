@@ -314,16 +314,30 @@
 
     .controls {
       display: flex;
-      align-items: center;
+      /* align-items: center; */
       justify-content: center;
       text-align: center;
-      margin: 0 0 30px 0;
-      padding: 0 0 30px 0;
+      margin: 0 0 15px 0;
+      padding: 0 0 15px 0;
       border-bottom: 1px solid #eee;
     }
 
     .controls > div {
-      padding: 10px;
+      flex: 0 0 50%;
+      padding: 0 20px;
+    }
+
+    .controls button {
+      display: block;
+      width: 100%;
+    }
+
+    .auto-increment-container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 15px 0 30px 0;
+      text-align: center;
     }
 
     .icon {
@@ -398,6 +412,7 @@
       margin: 0 0 10px 0;
     }
 
+    .type-s { font-size: 14px !important; }
     .type-lg { font-size: 18px !important; }
     .type-xl { font-size: 22px !important; }
     .type-xxl { font-size: 28px !important; }
@@ -427,15 +442,19 @@
         </p>
       </div>
       <div class="controls-container">
+
         <div class="controls">
           <div>
             <button id="increment" class="button type-xxxl">Increment</button>
-            <button id="reset" class="button type-s">Reset</button>
           </div>
           <div>
-            <input type="checkbox" id="autoincrement" value="value">
-            <label for="autoincrement" class="type-xl">Auto Increment</label>
+            <button id="reset" class="button type-xxxl">Reset</button>
           </div>
+        </div>
+
+        <div class="auto-increment-container">
+          <input type="checkbox" id="autoincrement" value="value" />
+          <label for="autoincrement" class="type-xl">Auto Increment</label>
         </div>
 
         <div class="output">
