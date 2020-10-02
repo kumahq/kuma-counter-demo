@@ -6,6 +6,22 @@
     var interval;
     var running = false;
 
+    // Set shortcut for delete which does not exist nativelt in jQuery
+    $.delete = function(url, data, callback, type) {
+      if ( $.isFunction(data) ){
+        type = type || callback,
+            callback = data,
+            data = {}
+      }
+      return $.ajax({
+        url: url,
+        type: 'DELETE',
+        success: callback,
+        data: data,
+        contentType: type
+      });
+    }
+
     function increment() {
       var status = $("#status");
       var zone = $("#zone");
@@ -40,9 +56,44 @@
       });
     }
 
+    function reset() {
+      var status = $("#status");
+      var zone = $("#zone");
+      var counter = $("#counter");
+      
+      if (running) {
+        return;
+      }
+      running = true;
+      
+      $.delete('/counter', function (data, textStatus, jqXHR) {
+        if (data.err == null) {
+          status.removeClass("error");
+          status.text("Everything is working")
+          counter.text(data.counter);
+          var zoneVal = data.zone;
+          if (zoneVal == null) {
+            zoneVal = "unknown";
+          }
+          zone.text(zoneVal);
+        } else {
+          status.addClass("error");
+          status.text("Cannot connect to: redis")
+          counter.text("-");
+          zone.text("-");
+        }
+        running = false;
+      }).fail(function(){
+        status.addClass("error");
+        status.text("Cannot connect to: demo-app")
+        running = false;
+      });
+    }
+
     function stopAutoIncrement() {
       clearInterval(interval);
       $("#increment").prop("disabled", false);
+      $("#reset").prop("disabled", false);
       $("#autoincrement").prop("checked", false);
     }
 
@@ -79,10 +130,15 @@
         increment();
       });
 
+      $("#reset").click(function(){
+        reset();
+      });
+
       var autoincrement = $("#autoincrement");
       autoincrement.click(function(){
         if (autoincrement.is(":checked")) {
           $("#increment").prop("disabled", true);
+          $("#reset").prop("disabled", true);
           interval = setInterval(function(){
             increment();
           }, 0);
@@ -374,6 +430,7 @@
         <div class="controls">
           <div>
             <button id="increment" class="button type-xxxl">Increment</button>
+            <button id="reset" class="button type-s">Reset</button>
           </div>
           <div>
             <input type="checkbox" id="autoincrement" value="value">
@@ -415,21 +472,6 @@
         </p>
       </div>
     </footer>
-
-    <!-- <div id="header">
-      <h1>Kuma Counter Demo <span id="version"></span></h1>
-      <p>A simple application that increments a counter in a `Redis` service via a `Demo App` service:</p>
-      <br><br>
-      <div id="">
-        <button id="increment">Increment</button>
-        <input type="checkbox" id="autoincrement" value="value"><label style="position: relative; top: -1px;" for="autoincrement">Auto Increment</label>
-      </div>
-    </div>
-    <div>
-      <span id="status"></span>
-      <span id="zone"></span>
-      <span id="counter"></span>
-    </div> -->
   </div>
 </body>
 </html>
