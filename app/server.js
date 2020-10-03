@@ -3,8 +3,9 @@ const Redis = require("ioredis");
 
 const COUNTER_KEY = "counter"
 const ZONE_KEY = "zone"
-const app = express();
 const PORT = 5000;
+
+const app = express();
 
 var version = process.env.APP_VERSION || "1.0";
 var color = process.env.APP_COLOR || "#efefef";
@@ -53,6 +54,26 @@ app.post('/increment', function(req, res){
             counter_result = 0;
           }
           res.send({counter: counter_result, zone: zone_result, err: err});
+        }
+      });
+    }
+  });
+});
+
+app.delete('/counter', function(req, res){
+  var client = getClient();
+  client.del(COUNTER_KEY, function(err) {
+    if (err) {
+      console.log(err);
+      res.send({err:true});
+    } else {
+      client.get(ZONE_KEY, function(err, zone_result) {
+        client.quit();
+        if (err) {
+          console.log(err);
+          res.send({err:true});
+        } else {
+          res.send({counter: 0, zone: zone_result, err: err});
         }
       });
     }
