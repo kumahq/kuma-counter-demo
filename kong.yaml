@@ -18,6 +18,7 @@ metadata:
   name: demo-ingress
   namespace: kuma-demo
   annotations:
+    kubernetes.io/ingress.class: kong
     konghq.com/strip-path: 'true'
 spec:
   rules:
