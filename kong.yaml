@@ -35,3 +35,18 @@ minikube service -n kong kong-proxy --url | head -1
 
 # And consume!
 
+# You can also apply some plugins, like rate-limiting
+# (applied globally in this example)
+
+echo "apiVersion: configuration.konghq.com/v1
+kind: KongClusterPlugin
+metadata:
+  name: global-rate-limiting
+  annotations:
+    kubernetes.io/ingress.class: kong
+  labels:
+    global: \"true\"
+config: 
+  minute: 5
+  policy: local
+plugin: rate-limiting" | kubectl apply -f -
