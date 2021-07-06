@@ -16,6 +16,8 @@ Kuma is a CNCF Sandbox project.
 
 This demo application consists of two services: a `demo-app` service that presents a web application that allows us to increment a numeric counter stored in another `redis` service.
 
+<img width="861" alt="kuma-counter-demo" src="https://user-images.githubusercontent.com/964813/124640078-c5efce00-de41-11eb-9513-4e11b88ca64c.png">
+
 The `demo-app` service by default presents a browser interface that listens on port `5000` that we can use to increment our counters. When the `demo-app` starts, it expects to find a `zone` key in Redis that it is being used to determine the arbitrary name of the datacenter (or cluster) that the current `redis` instance belongs to, which is then displayed in the `demo-app` GUI.
 
 The `zone` key is purely static and arbitrary, but by having different `zone` values across different `redis` instances, we know at any given time from which Redis instance we are fetching/incrementing our counter when we route across a distributed environment across many zones, clusters and clouds.
