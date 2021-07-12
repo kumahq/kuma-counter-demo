@@ -1,1 +1,85 @@
-# Kuma Demo
+# Kuma Counter Demo
+
+[![][kuma-logo]][kuma-url]
+
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://github.com/kumahq/kuma/blob/master/LICENSE)
+[![Slack](https://chat.kuma.io/badge.svg)](https://chat.kuma.io/)
+[![Twitter](https://img.shields.io/twitter/follow/KumaMesh.svg?style=social&label=Follow)](https://twitter.com/intent/follow?screen_name=KumaMesh)
+
+Welcome to a sample application that demonstrates the [Kuma](https://kuma.io) service mesh in action. Kuma is designed to work across Kubernetes and VMs environments, with support for multi-zone deployments across many different clusters, data centers, and clouds.
+
+To learn more about Kuma, see [the Kuma repository](https://github.com/kumahq/kuma).
+
+Kuma is a CNCF Sandbox project.
+
+## Introduction
+
+The application consists of two services: 
+
+- A `demo-app` service that presents a web application that allows us to increment a numeric counter 
+- A `redis` service that stores the counter
+
+<img width="861" alt="kuma-counter-demo" src="https://user-images.githubusercontent.com/964813/124640078-c5efce00-de41-11eb-9513-4e11b88ca64c.png">
+
+The `demo-app` service presents a browser interface that listens on port `5000`. When it starts, it expects to find a `zone` key in Redis that specifies the name of the datacenter (or cluster) that the current `redis` instance belongs to. This name is then displayed in the `demo-app` GUI.
+
+The `zone` key is purely static and arbitrary, but by having different `zone` values across different `redis` instances, we know at any given time from which Redis instance we are fetching/incrementing our counter when we route across a distributed environment across many zones, clusters and clouds.
+
+### Run the application
+
+1.  Run `redis` on the default port `6379` and set a default `zone` name:
+
+    ```sh
+    $ redis-server
+    $ redis-cli set zone local
+    ```
+
+1.  Start `demo-app` on the default port `5000`:
+
+    ```sh
+    $ npm start --prefix=app/
+    ```
+
+1.  Navigate to [`127.0.0.1:5000`](http://127.0.0.1:5000) and increment the counter!
+
+### Run in Kubernetes
+
+Two different YAML files are provided for Kubernetes:
+
+- one that installs the basic resources
+- one that installs a version of the frontend service with different colors (useful to demonstrate routing across multiple versions, for example)
+
+1.  Install the basic demo resources in a `kuma-demo` namespace:
+
+    ```sh
+    $ kubectl apply -f demo.yaml
+    ```
+
+1.  Port-forward the service to the namespace on port `5000`:
+
+    ```sh
+    $ kubectl port-forward svc/demo-app -n kuma-demo 5000:5000
+    ```
+
+1.  Navigate to [`127.0.0.1:5000`](http://127.0.0.1:5000) and increment the counter!
+
+### Run v2 (Kubernetes)
+
+To install the `v2` version of the demo application, we can apply the following YAML file instead, which will change the colors and version number of our frontend application:
+
+```sh
+$ kubectl apply -f demo-v2.yaml
+```
+
+By inspecting the file we can see that the `demo-v2.yaml` file sets the following environment variables - which are also available on VMs - to different values so that we have immediate visual feedback that a new version is runnning.
+
+### Environment Variables
+
+We can configure the following environment variables when running `demo-app`:
+
+* `REDIS_HOST`: Determines the hostname to use when connecting to Redis. Default is `127.0.0.1`.
+* `REDIS_PORT`: Determines the port to use when connecting to Redis. Default is `6379`.
+* `APP_VERSION`: Lets you change the version number displayed in the main page of `demo-app`. Default is `1.0`.
+* `APP_COLOR`: Lets you change background color of the `demo-app` main page. Default is `#efefef`.
+
+The `APP_VERSION` and `APP_COLOR` environment variables are handy when we want to create different versions of `demo-app` and get immediate visual feedback when routing across them.
