@@ -83,3 +83,6 @@ We can configure the following environment variables when running `demo-app`:
 * `APP_COLOR`: Lets you change background color of the `demo-app` main page. Default is `#efefef`.
 
 The `APP_VERSION` and `APP_COLOR` environment variables are handy when we want to create different versions of `demo-app` and get immediate visual feedback when routing across them.
+
+[kuma-url]: https://kuma.io/
+[kuma-logo]: https://kuma-public-assets.s3.amazonaws.com/kuma-logo-v2.png
