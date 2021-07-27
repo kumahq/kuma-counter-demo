@@ -40,21 +40,22 @@ The `zone` key is purely static and arbitrary, but by having different `zone` va
 
      ```sh
     $ redis-server --port 26379
-    $ redis-cli set zone local
+    $ redis-cli -p 26379 set zone local
     ```
 
-2.  Start `demo-app` on the default port `5000`:
+2.  Install and start `demo-app` on the default port `5000`:
 
     ```sh
+    $ npm install --prefix=app/
     $ npm start --prefix=app/
     ```
 
-3.  Navigate to [`127.0.0.1:5000`](http://127.0.0.1:5000) and increment the counter!
+3.  (Only for Kubernetess) Navigate to [`127.0.0.1:5000`](http://127.0.0.1:5000) and increment the counter!
 
 
 ### Run in Universal
 
-1. First we need to genarate two tokens:
+1. First we need to generate two tokens:
  - One for redis
  - Second for node-app
 To do so we need to run:
