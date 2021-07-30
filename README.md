@@ -27,20 +27,94 @@ The `zone` key is purely static and arbitrary, but by having different `zone` va
 
 ### Run the application
 
-1.  Run `redis` on the default port `6379` and set a default `zone` name:
+1.  Run `redis` 
+
+    - (Kubernetes setup) on the default port `6379`  and set a default `zone` name:
 
     ```sh
     $ redis-server
     $ redis-cli set zone local
     ```
 
-1.  Start `demo-app` on the default port `5000`:
+    - (Universal setup) on port `26379` and set a default `zone` name:
+
+     ```sh
+    $ redis-server --port 26379
+    $ redis-cli -p 26379 set zone local
+    ```
+
+2.  Install and start `demo-app` on the default port `5000`:
 
     ```sh
+    $ npm install --prefix=app/
     $ npm start --prefix=app/
     ```
 
-1.  Navigate to [`127.0.0.1:5000`](http://127.0.0.1:5000) and increment the counter!
+3.  (Only for Kubernetess) Navigate to [`127.0.0.1:5000`](http://127.0.0.1:5000) and increment the counter!
+
+
+### Run in Universal
+
+1. First we need to generate two tokens:
+ - One for redis
+ - Second for node-app
+To do so we need to run:
+
+    ```sh
+    $ kumactl generate dataplane-token --name=redis > kuma-token-redis
+    $ kumactl generate dataplane-token --name=app > kuma-token-app
+    ```
+
+2. Then we need to generate two DPPs:
+- For redis:
+
+    ```sh
+    $ kuma-dp run \
+      --cp-address=https://localhost:5678/ \
+      --dns-enabled=false \
+      --dataplane="type: Dataplane
+                mesh: default
+                name: redis
+                networking: 
+                address: 0.0.0.0
+                inbound: 
+                    - port: 16379
+                    servicePort: 26379
+                    serviceAddress: 127.0.0.1
+                    tags: 
+                        kuma.io/service: redis
+                        kuma.io/protocol: tcp" \
+      --dataplane-token-file=kuma-token-redis
+
+    ```
+
+
+- And for app:
+
+    ```sh
+    $ kuma-dp run \
+      --cp-address=https://localhost:5678/ \
+      --dns-enabled=false \
+      --dataplane="type: Dataplane
+                mesh: default
+                name: app
+                networking: 
+                address: 0.0.0.0
+                outbound:
+                    - port: 6379
+                    tags:
+                        kuma.io/service: redis
+                inbound: 
+                    - port: 15000
+                    servicePort: 5000
+                    serviceAddress: 127.0.0.1
+                    tags: 
+                        kuma.io/service: app
+                        kuma.io/protocol: http" \
+      --dataplane-token-file=kuma-token-app
+    ```
+
+3.  Navigate to [`127.0.0.1:5000`](http://127.0.0.1:5000) and increment the counter!
 
 ### Run in Kubernetes
 
