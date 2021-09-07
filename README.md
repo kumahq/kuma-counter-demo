@@ -76,8 +76,8 @@ To do so we need to run:
                 mesh: default
                 name: redis
                 networking: 
-                address: 0.0.0.0
-                inbound: 
+                  address: 0.0.0.0
+                  inbound: 
                     - port: 16379
                     servicePort: 26379
                     serviceAddress: 127.0.0.1
@@ -99,12 +99,12 @@ To do so we need to run:
                 mesh: default
                 name: app
                 networking: 
-                address: 0.0.0.0
-                outbound:
+                  address: 0.0.0.0
+                  outbound:
                     - port: 6379
                     tags:
                         kuma.io/service: redis
-                inbound: 
+                  inbound: 
                     - port: 15000
                     servicePort: 5000
                     serviceAddress: 127.0.0.1
