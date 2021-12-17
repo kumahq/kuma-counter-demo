@@ -5,6 +5,8 @@
   <script type="text/javascript">
     var interval;
     var running = false;
+    var redisErrCount = 0;
+    var appErrCount = 0;
 
     // Set shortcut for delete which does not exist nativelt in jQuery
     $.delete = function(url, data, callback, type) {
@@ -26,6 +28,8 @@
       var status = $("#status");
       var zone = $("#zone");
       var counter = $("#counter");
+      var redisErrors = $("#redis-error-count");
+      var appErrors = $("#app-error-count");
       
       if (running) {
         return;
@@ -44,14 +48,18 @@
           zone.text(zoneVal);
         } else {
           status.addClass("error");
-          status.text("Cannot connect to: redis")
+          status.text("Cannot connect to: redis");
+          redisErrCount++;
+          redisErrors.text(redisErrCount);
           counter.text("-");
           zone.text("-");
         }
         running = false;
       }).fail(function(){
         status.addClass("error");
-        status.text("Cannot connect to: demo-app")
+        status.text("Cannot connect to: demo-app");
+        appErrCount++;
+        appErrors.text(appErrCount);
         running = false;
       });
     }
@@ -79,6 +87,8 @@
         } else {
           status.addClass("error");
           status.text("Cannot connect to: redis")
+          redisErrCount++;
+          redisErrors.text(redisErrCount);
           counter.text("-");
           zone.text("-");
         }
@@ -86,6 +96,8 @@
       }).fail(function(){
         status.addClass("error");
         status.text("Cannot connect to: demo-app")
+        appErrCount++;
+        appErrors.text(appErrCount);
         running = false;
       });
     }
@@ -475,6 +487,12 @@
             <p>
               <span id="zone"></span>
             </p>
+          </div>
+          <div>
+              redis errors: <span id="redis-error-count">0</span>
+          </div>
+          <div>
+              demo-app errors: <span id="app-error-count">0</span>
           </div>
 
         </div>
