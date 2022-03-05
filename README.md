@@ -14,9 +14,9 @@ Kuma is a CNCF Sandbox project.
 
 ## Introduction
 
-The application consists of two services: 
+The application consists of two services:
 
-- A `demo-app` service that presents a web application that allows us to increment a numeric counter 
+- A `demo-app` service that presents a web application that allows us to increment a numeric counter
 - A `redis` service that stores the counter
 
 <img width="861" alt="kuma-counter-demo" src="https://user-images.githubusercontent.com/964813/124640078-c5efce00-de41-11eb-9513-4e11b88ca64c.png">
@@ -27,7 +27,7 @@ The `zone` key is purely static and arbitrary, but by having different `zone` va
 
 ### Run the application
 
-1.  Run `redis` 
+1.  Run `redis`
 
     - (Kubernetes setup) on the default port `6379`  and set a default `zone` name:
 
@@ -68,51 +68,50 @@ To do so we need to run:
 2. Then we need to generate two DPPs:
 - For redis:
 
-    ```sh
-    $ kuma-dp run \
-      --cp-address=https://localhost:5678/ \
-      --dns-enabled=false \
-      --dataplane="type: Dataplane
-                mesh: default
-                name: redis
-                networking: 
-                  address: 0.0.0.0
-                  inbound: 
-                    - port: 16379
-                    servicePort: 26379
-                    serviceAddress: 127.0.0.1
-                    tags: 
-                        kuma.io/service: redis
-                        kuma.io/protocol: tcp" \
-      --dataplane-token-file=kuma-token-redis
-
-    ```
+```sh
+kuma-dp run \
+   --cp-address=https://localhost:5678/ \
+   --dns-enabled=false \
+   --dataplane-token-file=kuma-token-redis \
+   --dataplane="type: Dataplane
+mesh: default
+name: redis
+networking:
+  address: 0.0.0.0
+  inbound:
+    - port: 16379
+      servicePort: 26379
+      serviceAddress: 127.0.0.1
+      tags:
+        kuma.io/service: redis
+        kuma.io/protocol: tcp"
+```
 
 
 - And for app:
 
-    ```sh
-    $ kuma-dp run \
-      --cp-address=https://localhost:5678/ \
-      --dns-enabled=false \
-      --dataplane="type: Dataplane
-                mesh: default
-                name: app
-                networking: 
-                  address: 0.0.0.0
-                  outbound:
-                    - port: 6379
-                    tags:
-                        kuma.io/service: redis
-                  inbound: 
-                    - port: 15000
-                    servicePort: 5000
-                    serviceAddress: 127.0.0.1
-                    tags: 
-                        kuma.io/service: app
-                        kuma.io/protocol: http" \
-      --dataplane-token-file=kuma-token-app
-    ```
+```sh
+kuma-dp run \
+  --cp-address=https://localhost:5678/ \
+  --dns-enabled=false \
+  --dataplane-token-file=kuma-token-app \
+  --dataplane="type: Dataplane
+mesh: default
+name: app
+networking:
+  address: 0.0.0.0
+  outbound:
+    - port: 6379
+      tags:
+        kuma.io/service: redis
+  inbound:
+    - port: 15000
+      servicePort: 5000
+      serviceAddress: 127.0.0.1
+      tags:
+        kuma.io/service: app
+        kuma.io/protocol: http"
+```
 
 3.  Navigate to [`127.0.0.1:5000`](http://127.0.0.1:5000) and increment the counter!
 
