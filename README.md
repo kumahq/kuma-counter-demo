@@ -77,11 +77,10 @@ kuma-dp run \
 mesh: default
 name: redis
 networking:
-  address: 0.0.0.0
+  address: 127.0.0.1 # Or any public address (needs to be reachable by every other dp in the zone) 
   inbound:
     - port: 16379
       servicePort: 26379
-      serviceAddress: 127.0.0.1
       tags:
         kuma.io/service: redis
         kuma.io/protocol: tcp"
@@ -91,7 +90,7 @@ networking:
 - And for app:
 
 ```sh
-kuma-dp run \
+KUMA_DATAPLANE_ADMIN_PORT=9902 kuma-dp run \
   --cp-address=https://localhost:5678/ \
   --dns-enabled=false \
   --dataplane-token-file=kuma-token-app \
@@ -99,7 +98,7 @@ kuma-dp run \
 mesh: default
 name: app
 networking:
-  address: 0.0.0.0
+  address: 127.0.0.1 # Or any public address (needs to be reachable by every other dp in the zone) 
   outbound:
     - port: 6379
       tags:
@@ -107,10 +106,11 @@ networking:
   inbound:
     - port: 15000
       servicePort: 5000
-      serviceAddress: 127.0.0.1
       tags:
         kuma.io/service: app
         kuma.io/protocol: http"
+   admin:
+     port: 9902
 ```
 
 3.  Navigate to [`127.0.0.1:5000`](http://127.0.0.1:5000) and increment the counter!
