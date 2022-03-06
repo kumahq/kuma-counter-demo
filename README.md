@@ -90,7 +90,7 @@ networking:
 - And for app:
 
 ```sh
-KUMA_DATAPLANE_ADMIN_PORT=9902 kuma-dp run \
+kuma-dp run \
   --cp-address=https://localhost:5678/ \
   --dns-enabled=false \
   --dataplane-token-file=kuma-token-app \
@@ -108,9 +108,9 @@ networking:
       servicePort: 5000
       tags:
         kuma.io/service: app
-        kuma.io/protocol: http"
-   admin:
-     port: 9902
+        kuma.io/protocol: http
+  admin:
+    port: 9902"
 ```
 
 3.  Navigate to [`127.0.0.1:5000`](http://127.0.0.1:5000) and increment the counter!
