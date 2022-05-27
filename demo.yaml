@@ -63,7 +63,7 @@ spec:
     spec:
       containers:
         - name: demo-app
-          image: "thefosk/kuma-demo"
+          image: "kumahq/kuma-demo"
           env:
             - name: REDIS_HOST
               value: "redis.kuma-demo.svc.cluster.local"

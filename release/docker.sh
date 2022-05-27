@@ -16,8 +16,8 @@ function build_and_push() {
       docker tag "${KUMA_DOCKER_REPO_ORG}/kuma-demo:${VERSION}-${arch}" "${KUMA_DOCKER_REPO_ORG}/kuma-demo:latest-${arch}"
     fi
     if [ $DRY_RUN != "true" ]; then
-      echo "Pushing kuma-demo:$KUMA_VERSION-$arch ..."
-      docker push "${KUMA_DOCKER_REPO_ORG}/kuma-demo:${KUMA_VERSION}-${arch}"
+      echo "Pushing kuma-demo:$VERSION-$arch ..."
+      docker push "${KUMA_DOCKER_REPO_ORG}/kuma-demo:${VERSION}-${arch}"
       echo "... done!"
     fi  
     echo "... done!"   
@@ -25,16 +25,17 @@ function build_and_push() {
   if [ $DRY_RUN != "true" ]; then
       images=()
       for arch in ${BUILD_ARCH}; do
-        images+=("--amend ${KUMA_DOCKER_REPO_ORG}/kuma-demo:${KUMA_VERSION}-${arch}")
+        images+=("--amend ${KUMA_DOCKER_REPO_ORG}/kuma-demo:${VERSION}-${arch}")
       done
-      command="docker manifest create ${KUMA_DOCKER_REPO_ORG}/kuma-demo:${KUMA_VERSION} ${images[*]}"
-      echo "Creating manifest for ${KUMA_DOCKER_REPO_ORG}/kuma-demo:${KUMA_VERSION}..."
+      command="docker manifest create ${KUMA_DOCKER_REPO_ORG}/kuma-demo:${VERSION} ${images[*]}"
+      echo "Creating manifest for ${KUMA_DOCKER_REPO_ORG}/kuma-demo:${VERSION}..."
       eval "$command"
-      echo "Pushing manifest ${KUMA_DOCKER_REPO_ORG}/kuma-demo:${KUMA_VERSION} ..."
-      docker manifest push "${KUMA_DOCKER_REPO_ORG}/kuma-demo:${KUMA_VERSION}"
+      echo "Pushing manifest ${KUMA_DOCKER_REPO_ORG}/kuma-demo:${VERSION} ..."
+      docker manifest push "${KUMA_DOCKER_REPO_ORG}/kuma-demo:${VERSION}"
       echo ".. done!"
   fi
 }
+
 if [ $DRY_RUN != "true" ]; then
   [ -z "$DOCKER_USERNAME" ] && echo "\$DOCKER_USERNAME required"
   [ -z "$DOCKER_API_KEY" ] && echo "\$DOCKER_API_KEY required"
