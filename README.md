@@ -136,6 +136,31 @@ Two different YAML files are provided for Kubernetes:
 
 1.  Navigate to [`127.0.0.1:5000`](http://127.0.0.1:5000) and increment the counter!
 
+#### `MeshGateway`
+
+An additional YAML file `gateway.yaml` is provided for setting up a
+(Kuma `MeshGateway`)[https://kuma.io/docs/1.7.x/explore/gateway/#builtin] to
+serve the demo app.
+
+1.  Install the `MeshGateway` resources:
+
+    ```sh
+    $ kubectl apply -f gateway.yaml
+    ```
+
+1. If your k8s environment supports `LoadBalancer` `Services`, you can access
+   the gateway via its external IP:
+
+   ```
+   $ curl $(kubectl get svc -n kuma-demo demo-app-gateway -o=jsonpath='{.status.loadBalancer.ingress[0].ip}')
+   ```
+
+   Otherwise you can access the gateway inside the cluster via its cluster IP:
+
+   ```
+   $ kubectl run curl-gateway --rm -i --tty --image nicolaka/netshoot --restart=OnFailure -- curl $(kubectl get svc -n kuma-demo demo-app-gateway -o=jsonpath='{.spec.clusterIP}')
+   ```
+
 ### Run v2 (Kubernetes)
 
 To install the `v2` version of the demo application, we can apply the following YAML file instead, which will change the colors and version number of our frontend application:
