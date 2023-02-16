@@ -139,7 +139,7 @@ Two different YAML files are provided for Kubernetes:
 #### `MeshGateway`
 
 An additional YAML file `gateway.yaml` is provided for setting up a
-(Kuma `MeshGateway`)[https://kuma.io/docs/1.7.x/explore/gateway/#builtin] to
+[Kuma `MeshGateway`](https://kuma.io/docs/1.7.x/explore/gateway/#builtin) to
 serve the demo app.
 
 1.  Install the `MeshGateway` resources:
