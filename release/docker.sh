@@ -13,7 +13,7 @@ function build_and_push() {
     echo "Building kuma-demo..."
     docker build --pull --build-arg ARCH="${arch}" -t "${KUMA_DOCKER_REPO_ORG}/kuma-demo:latest-${arch}" -f release/Dockerfile .
     if [ $VERSION != "latest" ]; then 
-      docker tag "${KUMA_DOCKER_REPO_ORG}/kuma-demo:${VERSION}-${arch}" "${KUMA_DOCKER_REPO_ORG}/kuma-demo:latest-${arch}"
+      docker tag "${KUMA_DOCKER_REPO_ORG}/kuma-demo:latest-${arch}" "${KUMA_DOCKER_REPO_ORG}/kuma-demo:${VERSION}-${arch}"
     fi
     if [ $DRY_RUN != "true" ]; then
       echo "Pushing kuma-demo:$VERSION-$arch ..."
