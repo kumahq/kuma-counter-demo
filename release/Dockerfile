@@ -11,4 +11,5 @@ EXPOSE 5000
 
 STOPSIGNAL SIGQUIT
 
-CMD ["npm", "start", "--prefix", "/app"]
+WORKDIR "/app"
+CMD ["node", "server.js"]
