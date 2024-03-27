@@ -2,12 +2,12 @@ ARG ARCH=amd64
 FROM --platform=linux/${ARCH} node:alpine
 
 RUN apk add dumb-init
-
 COPY /app/package.json /app/package.json
-COPY /app/server.js /app/server.js
-COPY /app/public /app/public
 
 RUN npm install --prefix /app
+
+COPY /app/public /app/public
+COPY /app/server.js /app/server.js
 
 EXPOSE 5000
 
