@@ -110,6 +110,16 @@ app.get('/version', function(req, res) {
   });
 });
 
-app.listen(PORT, function(){
+const server = app.listen(PORT, function(){
   console.log("Server running on port %s", PORT);
 });
+
+const shutdown = (event) => {
+  console.log('%s signal received: closing HTTP server', event)
+  server.close(() => {
+    console.log('HTTP server closed')
+  })
+};
+
+process.on('SIGTERM', shutdown)
+process.on('SIGINT', shutdown)
