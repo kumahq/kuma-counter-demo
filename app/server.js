@@ -1,5 +1,7 @@
 const express = require('express')
 const Redis = require("ioredis");
+const timers = require("timers/promises");
+const util = require("util");
 
 const COUNTER_KEY = "counter"
 const ZONE_KEY = "zone"
@@ -114,11 +116,10 @@ const server = app.listen(PORT, function(){
   console.log("Server running on port %s", PORT);
 });
 
-const shutdown = (event) => {
-  console.log('%s signal received: closing HTTP server', event)
-  server.close(() => {
-    console.log('HTTP server closed')
-  })
+const shutdown = async (event) => {
+  console.log('%s signal received: wait 1s to ensure this endpoint is dropped and shutting down', event)
+  await timers.setTimeout(1000);
+  await util.promisify(server.close.bind(server))();
 };
 
 process.on('SIGTERM', shutdown)
