@@ -1,0 +1,29 @@
+name: build
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Tag of image. Note that latest is used with the demo.yaml and kumactl!
+        required: true
+        type: string
+permissions:
+  contents: read
+
+env:
+  DOCKER_REPO: kumahq/kuma-demo
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      - name: Build and push
+        uses: docker/build-push-action@v5
+        with:
+          push: false
+          platforms: linux/amd64, linux/arm64
+          tags: ${{ env.DOCKER_REPO }}:${{ inputs.tag }}
