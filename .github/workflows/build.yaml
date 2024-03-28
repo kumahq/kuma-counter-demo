@@ -1,6 +1,9 @@
 name: build
 
 on:
+  # Note we push docker images if the event was a git push
+  push:
+    branches: [master]
   workflow_dispatch:
     inputs:
       tag:
@@ -35,6 +38,6 @@ jobs:
       - name: Build and push
         uses: docker/build-push-action@v5
         with:
-          push: ${{ fromJSON(inputs.push) }}
+          push: ${{ github.event_name == 'push' || fromJSON(inputs.push) }}
           platforms: linux/amd64, linux/arm64
-          tags: ${{ env.DOCKER_REPO }}:${{ inputs.tag }}
+          tags: ${{ env.DOCKER_REPO }}:${{ github.event_name == 'push' && 'dev' || inputs.tag }}
