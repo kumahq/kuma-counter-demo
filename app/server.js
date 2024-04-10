@@ -105,6 +105,25 @@ app.get('/counter', function(req, res){
   });
 });
 
+app.get('/stream-counter', async function(req, res){
+  var client = getClient();
+  res.flushHeaders();
+  while (true) {
+      await util.promisify(setTimeout)(1000);
+      try {
+        const counter = await client.get(COUNTER_KEY);
+        const zone = await client.get(ZONE_KEY);
+        res.write(JSON.stringify({counter, zone, err: false}));
+      } catch (err) {
+        res.write(JSON.stringify({err: true}));
+      }
+      res.write("\n");
+  }
+  client.quit();
+  res.end();
+});
+
+
 app.get('/version', function(req, res) {
   res.send({
     version: version,
