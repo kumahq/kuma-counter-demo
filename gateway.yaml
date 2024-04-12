@@ -42,5 +42,3 @@ metadata:
 spec:
   replicas: 1
   serviceType: LoadBalancer
-  tags:
-    kuma.io/service: demo-app_gateway
