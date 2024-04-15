@@ -32,22 +32,22 @@ The `zone` key is purely static and arbitrary, but by having different `zone` va
     - (Kubernetes setup) on the default port `6379`  and set a default `zone` name:
 
     ```sh
-    $ redis-server
-    $ redis-cli set zone local
+    redis-server
+    redis-cli set zone local
     ```
 
     - (Universal setup) on port `26379` and set a default `zone` name:
 
      ```sh
-    $ redis-server --port 26379
-    $ redis-cli -p 26379 set zone local
+    redis-server --port 26379
+    redis-cli -p 26379 set zone local
     ```
 
 2.  Install and start `demo-app` on the default port `5000`:
 
     ```sh
-    $ npm install --prefix=app/
-    $ npm start --prefix=app/
+    npm install --prefix=app/
+    npm start --prefix=app/
     ```
 
 3.  (Only for Kubernetess) Navigate to [`127.0.0.1:5000`](http://127.0.0.1:5000) and increment the counter!
@@ -61,8 +61,8 @@ The `zone` key is purely static and arbitrary, but by having different `zone` va
 To do so we need to run:
 
     ```sh
-    $ kumactl generate dataplane-token --name=redis > kuma-token-redis
-    $ kumactl generate dataplane-token --name=app > kuma-token-app
+    kumactl generate dataplane-token --name=redis > kuma-token-redis
+    kumactl generate dataplane-token --name=app > kuma-token-app
     ```
 
 2. Then we need to generate two DPPs:
@@ -125,13 +125,13 @@ Two different YAML files are provided for Kubernetes:
 1.  Install the basic demo resources in a `kuma-demo` namespace:
 
     ```sh
-    $ kubectl apply -f demo.yaml
+    kubectl apply -f demo.yaml
     ```
 
 1.  Port-forward the service to the namespace on port `5000`:
 
     ```sh
-    $ kubectl port-forward svc/demo-app -n kuma-demo 5000:5000
+    kubectl port-forward svc/demo-app -n kuma-demo 5000:5000
     ```
 
 1.  Navigate to [`127.0.0.1:5000`](http://127.0.0.1:5000) and increment the counter!
@@ -145,20 +145,20 @@ serve the demo app.
 1.  Install the `MeshGateway` resources:
 
     ```sh
-    $ kubectl apply -f gateway.yaml
+    kubectl apply -f gateway.yaml
     ```
 
 1. If your k8s environment supports `LoadBalancer` `Services`, you can access
    the gateway via its external IP:
 
    ```
-   $ curl $(kubectl get svc -n kuma-demo demo-app-gateway -o=jsonpath='{.status.loadBalancer.ingress[0].ip}')
+   curl $(kubectl get svc -n kuma-demo demo-app-gateway -o=jsonpath='{.status.loadBalancer.ingress[0].ip}')
    ```
 
    Otherwise you can access the gateway inside the cluster via its cluster IP:
 
    ```
-   $ kubectl run curl-gateway --rm -i --tty --image nicolaka/netshoot --restart=OnFailure -- curl $(kubectl get svc -n kuma-demo demo-app-gateway -o=jsonpath='{.spec.clusterIP}')
+   kubectl run curl-gateway --rm -i --tty --image nicolaka/netshoot --restart=OnFailure -- curl $(kubectl get svc -n kuma-demo demo-app-gateway -o=jsonpath='{.spec.clusterIP}')
    ```
 
 ### Run v2 (Kubernetes)
@@ -166,7 +166,7 @@ serve the demo app.
 To install the `v2` version of the demo application, we can apply the following YAML file instead, which will change the colors and version number of our frontend application:
 
 ```sh
-$ kubectl apply -f demo-v2.yaml
+kubectl apply -f demo-v2.yaml
 ```
 
 By inspecting the file we can see that the `demo-v2.yaml` file sets the following environment variables - which are also available on VMs - to different values so that we have immediate visual feedback that a new version is runnning.
