@@ -11,7 +11,7 @@ spec:
       protocol: HTTP
   selectors:
   - match:
-      kuma.io/service: demo-app_gateway
+      kuma.io/service: demo-app-gateway_kuma-demo_svc
 ---
 apiVersion: kuma.io/v1alpha1
 kind: MeshGatewayRoute
