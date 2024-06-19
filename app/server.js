@@ -12,6 +12,8 @@ const app = express();
 var version = process.env.APP_VERSION || "1.0";
 var color = process.env.APP_COLOR || "#efefef";
 
+const gracefulShutdownSeconds = process.env.GRACEFUL_SHUTDOWN_SECONDS || "1";
+
 function getClient() {
   var host = process.env.REDIS_HOST || "127.0.0.1";
   var port = parseInt(process.env.REDIS_PORT) || 6379;
@@ -136,8 +138,9 @@ const server = app.listen(PORT, function(){
 });
 
 const shutdown = async (event) => {
-  console.log('%s signal received: wait 1s to ensure this endpoint is dropped and shutting down', event)
-  await timers.setTimeout(1000);
+  const now = new Date();
+  console.log('%s: %s signal received: wait %ss to ensure this endpoint is dropped and shutting down', now.toISOString(), event, gracefulShutdownSeconds);
+  await timers.setTimeout(parseInt(gracefulShutdownSeconds)*1000);
   await util.promisify(server.close.bind(server))();
 };
 
