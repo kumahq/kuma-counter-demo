@@ -2,12 +2,21 @@ const express = require('express')
 const Redis = require("ioredis");
 const timers = require("timers/promises");
 const util = require("util");
+const path = require('path');
 
 const COUNTER_KEY = "counter"
 const ZONE_KEY = "zone"
 const PORT = 5000;
 
 const app = express();
+
+app.set('view engine', 'ejs');
+app.use((req, res, next) => {
+  const prefix = req.headers['x-forwarded-prefix'] || ''; // Default to empty string if no prefix
+  req.prefix = prefix; // Make prefix accessible in request
+  next();
+});
+
 
 var version = process.env.APP_VERSION || "1.0";
 var color = process.env.APP_COLOR || "#efefef";
@@ -37,7 +46,14 @@ function getClient() {
   return client;
 }
 
-app.use('/', express.static('public'));
+// Set the static folder (for serving images, CSS, and client-side JS)
+app.use(express.static(path.join(__dirname, 'public')));
+
+// Route to render the index.ejs file
+app.get('/', (req, res) => {
+  res.render('index', { prefix: req.prefix }); // This will render views/index.ejs
+});
+
 
 app.post('/increment', function(req, res){
   var client = getClient();
