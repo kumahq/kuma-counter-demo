@@ -7,6 +7,7 @@
     var running = false;
     var redisErrCount = 0;
     var appErrCount = 0;
+    var prefix = '<%= prefix %>'
 
     // Set shortcut for delete which does not exist nativelt in jQuery
     $.delete = function(url, data, callback, type) {
@@ -36,7 +37,7 @@
       }
       running = true;
       
-      $.post('/increment', function (data, textStatus, jqXHR) {
+      $.post(prefix + '/increment', function (data, textStatus, jqXHR) {
         if (data.err == null) {
           status.removeClass("error");
           status.text("Everything is working")
@@ -74,7 +75,7 @@
       }
       running = true;
       
-      $.delete('/counter', function (data, textStatus, jqXHR) {
+      $.delete(prefix + '/counter', function (data, textStatus, jqXHR) {
         if (data.err == null) {
           status.removeClass("error");
           status.text("Everything is working")
@@ -114,13 +115,13 @@
       var zone = $("#zone");
       var counter = $("#counter");
 
-      $.get('/version', function (data, textStatus, jqXHR) {
+      $.get(prefix + '/version', function (data, textStatus, jqXHR) {
         $("#header").css("background-color", data.color);
         $("#version").text(data.version);
         $("#loading").remove();
         $("#content").removeClass("hide");
       });
-      $.get('/counter', function (data, textStatus, jqXHR) {
+      $.get(prefix + '/counter', function (data, textStatus, jqXHR) {
         var counterVal;
         var zoneVal;
         if (data == null) {
@@ -453,7 +454,7 @@
           <li><strong>redis:</strong> To store the counter value</li>
         </ul>
         <p>
-          <img class="diagram" src="./demo-app-diagram.png" alt="Kuma Counter Demo App diagram">
+          <img class="diagram" src="<%= prefix %>/demo-app-diagram.png" alt="Kuma Counter Demo App diagram">
         </p>
       </div>
       <div class="controls-container">
@@ -506,7 +507,7 @@
         </p>
         <p>
           <a href="https://github.com/kumahq/kuma-counter-demo" class="icon-button" target="_blank">
-            <img src="./github.svg" alt="GitHub logo" class="icon">
+            <img src="<%= prefix %>/github.svg" alt="GitHub logo" class="icon">
             <span>https://github.com/kumahq/kuma-counter-demo</span>
           </a>
         </p>
