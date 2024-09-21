@@ -5,7 +5,7 @@
   "author": "Marco Palladino <marco@konghq.com>",
   "homepage": "https://kuma.io",
   "dependencies": {
-    "express": "~4.19.2",
+    "express": "~4.21.0",
     "ioredis": "~4.17.3"
   },
   "engines": {
