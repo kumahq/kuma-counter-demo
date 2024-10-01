@@ -9,14 +9,14 @@ const PORT = 5000;
 
 const app = express();
 
-var version = process.env.APP_VERSION || "1.0";
-var color = process.env.APP_COLOR || "#efefef";
+const version = process.env.APP_VERSION || "1.0";
+const color = process.env.APP_COLOR || "#efefef";
 
 function getClient() {
-  var host = process.env.REDIS_HOST || "127.0.0.1";
-  var port = parseInt(process.env.REDIS_PORT) || 6379;
+  const host = process.env.REDIS_HOST || "127.0.0.1";
+  const port = parseInt(process.env.REDIS_PORT) || 6379;
   console.log("Connecting to Redis at %s:%d", host, port);
-  var client = new Redis({
+  const client = new Redis({
     port: port,
     host: host,
     family: 4,
@@ -37,10 +37,26 @@ function getClient() {
   return client;
 }
 
+const sleep = util.promisify(setTimeout);
+const delayMiddleware = function (req, res, next) {
+  const delay = parseInt(req.header("x-set-response-delay-ms") || 0, 10)
+  sleep(delay).then(() => {
+    next()
+  })
+}
+
+const statusCodeMiddleware = function (req, res, next) {
+  const statusCode = parseInt(req.header("x-set-response-status-code") || 200, 10)
+  res.status(statusCode)
+  next()
+}
+
+app.use(delayMiddleware)
+app.use(statusCodeMiddleware)
 app.use('/', express.static('public'));
 
 app.post('/increment', function(req, res){
-  var client = getClient();
+  const client = getClient();
   client.incr(COUNTER_KEY, function (err, counter_result) {
     if (err) {
       console.log(err);
@@ -63,7 +79,7 @@ app.post('/increment', function(req, res){
 });
 
 app.delete('/counter', function(req, res){
-  var client = getClient();
+  const client = getClient();
   client.del(COUNTER_KEY, function(err) {
     if (err) {
       console.log(err);
@@ -83,7 +99,7 @@ app.delete('/counter', function(req, res){
 });
 
 app.get('/counter', function(req, res){
-  var client = getClient();
+  const client = getClient();
   client.get(COUNTER_KEY, function(err, counter_result) {
     if (err) {
       console.log(err);

@@ -184,3 +184,21 @@ The `APP_VERSION` and `APP_COLOR` environment variables are handy when we want t
 
 [kuma-url]: https://kuma.io/
 [kuma-logo]: https://kuma-public-assets.s3.amazonaws.com/kuma-logo-v2.png
+
+## Modifying responses
+
+### Adding delay to response
+
+To add delay to response you need to set header `x-set-response-delay-ms`. Example:
+
+```shell
+curl localhost:5001/increment -XPOST -H "x-set-response-delay-ms: 5000"
+```
+
+### Enforcing response status code
+
+To enforce response status code you need to set header `x-set-response-status-code`. Example:
+
+```shell
+curl localhost:5001/increment -XPOST -H "x-set-response-status-code: 503"
+```
