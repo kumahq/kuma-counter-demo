@@ -4,6 +4,8 @@ kind: MeshGateway
 mesh: default
 metadata:
   name: demo-app
+  labels:
+    kuma.io/origin: zone
 spec:
   conf:
     listeners:
@@ -18,6 +20,9 @@ kind: MeshHTTPRoute
 metadata:
   name: demo-app
   namespace: kuma-system
+  labels:
+    kuma.io/origin: zone
+    kuma.io/mesh: default
 spec:
   targetRef:
     kind: MeshGateway
