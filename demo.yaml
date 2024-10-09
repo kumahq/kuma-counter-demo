@@ -39,6 +39,8 @@ kind: Service
 metadata:
   name: redis
   namespace: kuma-demo
+  labels:
+    app: redis
 spec:
   selector:
     app: redis
@@ -82,6 +84,8 @@ kind: Service
 metadata:
   name: demo-app
   namespace: kuma-demo
+  labels:
+    app: demo-app
 spec:
   selector:
     app: demo-app
