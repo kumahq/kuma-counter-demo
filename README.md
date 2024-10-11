@@ -1,5 +1,7 @@
 # Kuma Counter Demo
 
+[![Run in Insomnia}](https://insomnia.rest/images/run.svg)](https://insomnia.rest/run/?label=Kuma-count-demo&uri=https%3A%2F%2Fgithub.com%2Fkumahq%2Fkuma-counter-demo%2Fblob%2Fmaster%2Fopenapi.yaml)
+
 [![][kuma-logo]][kuma-url]
 
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://github.com/kumahq/kuma/blob/master/LICENSE)
@@ -202,3 +204,7 @@ To enforce response status code you need to set header `x-set-response-status-co
 ```shell
 curl localhost:5001/increment -XPOST -H "x-set-response-status-code: 503"
 ```
+
+### ErrorCodes
+
+#### Error Redis failure

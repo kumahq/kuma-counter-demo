@@ -1,518 +1,481 @@
 <html>
 <head>
-  <title>Kuma Demo</title>
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-  <script type="text/javascript">
-    var interval;
-    var running = false;
-    var redisErrCount = 0;
-    var appErrCount = 0;
+    <title>Kuma Demo</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 
-    // Set shortcut for delete which does not exist nativelt in jQuery
-    $.delete = function(url, data, callback, type) {
-      if ( $.isFunction(data) ){
-        type = type || callback,
-            callback = data,
-            data = {}
-      }
-      return $.ajax({
-        url: url,
-        type: 'DELETE',
-        success: callback,
-        data: data,
-        contentType: type
-      });
-    }
-
-    function increment() {
-      var status = $("#status");
-      var zone = $("#zone");
-      var counter = $("#counter");
-      var redisErrors = $("#redis-error-count");
-      var appErrors = $("#app-error-count");
-      
-      if (running) {
-        return;
-      }
-      running = true;
-      
-      $.post('/increment', function (data, textStatus, jqXHR) {
-        if (data.err == null) {
-          status.removeClass("error");
-          status.text("Everything is working")
-          counter.text(data.counter);
-          var zoneVal = data.zone;
-          if (zoneVal == null) {
-            zoneVal = "unknown";
-          }
-          zone.text(zoneVal);
-        } else {
-          status.addClass("error");
-          status.text("Cannot connect to: redis");
-          redisErrCount++;
-          redisErrors.text(redisErrCount);
-          counter.text("-");
-          zone.text("-");
+    <style type="text/css">
+        *, *:before, *:after {
+            box-sizing: border-box;
+            margin: 0;
         }
-        running = false;
-      }).fail(function(){
-        status.addClass("error");
-        status.text("Cannot connect to: demo-app");
-        appErrCount++;
-        appErrors.text(appErrCount);
-        running = false;
-      });
-    }
 
-    function reset() {
-      var status = $("#status");
-      var zone = $("#zone");
-      var counter = $("#counter");
-      
-      if (running) {
-        return;
-      }
-      running = true;
-      
-      $.delete('/counter', function (data, textStatus, jqXHR) {
-        if (data.err == null) {
-          status.removeClass("error");
-          status.text("Everything is working")
-          counter.text(data.counter);
-          var zoneVal = data.zone;
-          if (zoneVal == null) {
-            zoneVal = "unknown";
-          }
-          zone.text(zoneVal);
-        } else {
-          status.addClass("error");
-          status.text("Cannot connect to: redis")
-          redisErrCount++;
-          redisErrors.text(redisErrCount);
-          counter.text("-");
-          zone.text("-");
+        body {
+            font-family: "Segoe UI", Arial, sans-serif;
+            text-align: center;
+            font-size: 16px;
+            margin: 0;
         }
-        running = false;
-      }).fail(function(){
-        status.addClass("error");
-        status.text("Cannot connect to: demo-app")
-        appErrCount++;
-        appErrors.text(appErrCount);
-        running = false;
-      });
-    }
 
-    function stopAutoIncrement() {
-      clearInterval(interval);
-      $("#increment").prop("disabled", false);
-      $("#reset").prop("disabled", false);
-      $("#autoincrement").prop("checked", false);
-    }
-
-    $(document).ready(function() {
-      var status = $("#status");
-      var zone = $("#zone");
-      var counter = $("#counter");
-
-      $.get('/version', function (data, textStatus, jqXHR) {
-        $("#header").css("background-color", data.color);
-        $("#version").text(data.version);
-        $("#loading").remove();
-        $("#content").removeClass("hide");
-      });
-      $.get('/counter', function (data, textStatus, jqXHR) {
-        var counterVal;
-        var zoneVal;
-        if (data == null) {
-          counterVal = "0";
-          zoneVal = "unknown";
-        } else {
-          counterVal = data.counter;
-          zoneVal = data.zone;
-          if (zoneVal == null) {
-            zoneVal = "unknown";
-          }
+        #header {
+            padding: 50px;
+            background-color: #efefef;
         }
-        counter.text(counterVal);
-        zone.text(zoneVal);
-      });
 
-      $("#increment").click(function(){
-        increment();
-      });
-
-      $("#reset").click(function(){
-        reset();
-      });
-
-      var autoincrement = $("#autoincrement");
-      autoincrement.click(function(){
-        if (autoincrement.is(":checked")) {
-          $("#increment").prop("disabled", true);
-          $("#reset").prop("disabled", true);
-          interval = setInterval(function(){
-            increment();
-          }, 0);
-        } else {
-          stopAutoIncrement()
+        #counter {
+            /* font-size: 200px; */
+            /* text-shadow: 4px 4px #cccccc; */
         }
-      });
-    });
-  </script>
-  <style type="text/css">
-    *, *:before, *:after {
-      box-sizing: border-box;
-      margin: 0;
-    }
 
-    body {
-      font-family: "Segoe UI",Arial,sans-serif;
-      text-align: center;
-      font-size: 16px;
-      margin:0;
-    }
+        #zone {
+            /* font-size: 200px; */
+            /* text-shadow: 4px 4px #cccccc; */
+        }
 
-    #header {
-      padding: 50px;
-      background-color: #efefef;
-    }
+        .error {
+            /* color: red; */
+            /* font-size: 100px !important; */
+        }
 
-    #counter {
-      /* font-size: 200px; */
-      /* text-shadow: 4px 4px #cccccc; */
-    }
+        #buttons {
+            border: 1px solid #cccccc;
+            padding: 20px;
+            width: 400px;
+            margin: 0 auto;
+        }
 
-    #zone {
-      /* font-size: 200px; */
-      /* text-shadow: 4px 4px #cccccc; */
-    }
+        #increment {
+            font-size: 20px;
+        }
 
-    .error {
-      /* color: red; */
-      /* font-size: 100px !important; */
-    }
+        .hide {
+            display: none !important;
+        }
 
-    #buttons {
-      border: 1px solid #cccccc;
-      padding: 20px;
-      width: 400px;
-      margin: 0 auto;
-    }
+        h1, h2, h3, h4, h5, h6, p {
+            margin: 0 0 20px 0;
+        }
 
-    #increment {
-      font-size: 20px;
-    }
+        ul {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
 
-    .center {
-      position: absolute;
-      width: 200px;
-      height: 50px;
-      top: 50%;
-      left: 50%;
-      margin-left: -50px; /* margin is -0.5 * dimension */
-      margin-top: -25px; 
-    }​
+        img {
+            max-width: 100%;
+            height: auto;
+        }
 
-    .hide {
-      display: none !important;
-    }
+        a {
+            color: #1456cb;
+        }
 
-    h1, h2, h3, h4, h5, h6, p {
-      margin: 0 0 20px 0;
-    }
+        .diagram {
+            display: block;
+            margin: 30px auto;
+            text-align: center;
+        }
 
-    ul {
-      list-style: none;
-      margin: 0;
-      padding: 0;
-    }
+        .button {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            padding: 8px 12px;
+            font-size: 16px;
+            font-weight: 400;
+            line-height: 1.25;
+            text-decoration: none;
+            vertical-align: middle;
+            color: #fff;
+            border: 1px solid transparent;
+            border-radius: 3px;
+            transition: all .2s ease-in-out;
+            cursor: pointer;
+            background: #1456cb;
+        }
 
-    img {
-      max-width: 100%;
-      height: auto;
-    }
+        #status {
+            display: block;
+            border-radius: 5px;
+            padding: 10px;
+            margin: 20px auto;
+            background: #82d9a6;
+            font-size: 20px;
+            font-weight: bold;
+        }
 
-    a {
-      color: #1456cb;
-    }
+        #status.error {
+            background: #ffb3bf;
+        }
 
-    .diagram {
-      display: block;
-      margin: 30px auto;
-      text-align: center;
-    }
+        #status:empty {
+            display: none !important;
+        }
 
-    .button {
-      position: relative;
-      display: inline-flex;
-      align-items: center;
-      padding: 8px 12px;
-      font-size: 16px;
-      font-weight: 400;
-      line-height: 1.25;
-      text-decoration: none;
-      vertical-align: middle;
-      color: #fff;
-      border: 1px solid transparent;
-      border-radius: 3px;
-      transition: all .2s ease-in-out;
-      cursor: pointer;
-      background: #1456cb;
-    }
+        .content {
+            position: relative;
+        }
 
-    #status {
-      display: block;
-      border-radius: 5px;
-      padding: 10px;
-      margin: 20px auto;
-      background: #82d9a6;
-      font-size: 20px;
-      font-weight: bold;
-    }
+        .inner {
+            max-width: 1300px;
+            margin-left: auto;
+            margin-right: auto;
+        }
 
-    #status.error {
-      background: #ffb3bf;
-    }
+        .columns {
+            display: flex;
+            max-width: 1300px;
+            margin: 20px auto;
+            text-align: left;
+        }
 
-    #status:empty {
-      display: none !important;
-    }
+        .columns > div {
+            flex: 1;
+            flex-basis: 50%;
+            padding: 50px;
+        }
 
-    .content {
-      position: relative;
-    }
+        /* make sure to place your content above the pseudo element! */
+        .info > * {
+            position: relative;
+            z-index: 1;
+        }
 
-    .inner {
-      max-width: 1300px;
-      margin-left: auto;
-      margin-right: auto;
-    }
+        /* hacky background 50% column trick */
+        .info::after {
+            position: absolute;
+            top: 0;
+            left: 0;
+            display: block;
+            content: "";
+            width: 50vw;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.025);
+        }
 
-    .columns {
-      display: flex;
-      max-width: 1300px;
-      margin: 20px auto;
-      text-align: left;
-    }
+        button:disabled {
+            background-color: #cccccc;
+        }
 
-    .columns > div {
-      flex: 1;
-      flex-basis: 50%;
-      padding: 50px;
-    }
+        .controls-container {
 
-    /* make sure to place your content above the pseudo element! */
-    .info > * {
-      position: relative;
-      z-index: 1;
-    }
+        }
 
-    /* hacky background 50% column trick */
-    .info::after {
-      position: absolute;
-      top: 0;
-      left: 0;
-      display: block;
-      content: "";
-      width: 50vw;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.025);
-    }
+        .controls {
+            display: flex;
+            /* align-items: center; */
+            justify-content: center;
+            text-align: center;
+            margin: 0 0 15px 0;
+            padding: 0 0 15px 0;
+            border-bottom: 1px solid #eee;
+        }
 
-    button:disabled {
-      background-color: #cccccc;
-    }
+        .controls > div {
+            flex: 0 0 50%;
+            padding: 0 20px;
+        }
 
-    .controls-container {
-      
-    }
+        .controls button {
+            display: block;
+            width: 100%;
+        }
 
-    .controls {
-      display: flex;
-      /* align-items: center; */
-      justify-content: center;
-      text-align: center;
-      margin: 0 0 15px 0;
-      padding: 0 0 15px 0;
-      border-bottom: 1px solid #eee;
-    }
+        .auto-increment-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 15px 0 30px 0;
+            text-align: center;
+        }
 
-    .controls > div {
-      flex: 0 0 50%;
-      padding: 0 20px;
-    }
+        .icon {
+            display: inline-block;
+            width: 32px;
+            height: auto;
+            margin: 0 5px;
+        }
 
-    .controls button {
-      display: block;
-      width: 100%;
-    }
+        .icon-button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 5px;
+            background: #eee;
+            padding: 10px 20px;
+            margin: 10px 0;
+        }
 
-    .auto-increment-container {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin: 15px 0 30px 0;
-      text-align: center;
-    }
+        .icon-button img {
+            margin-right: 10px;
+        }
 
-    .icon {
-      display: inline-block;
-      width: 32px;
-      height: auto;
-      margin: 0 5px;
-    }
+        .tile {
+            text-align: left;
+            border-left: 3px solid;
+            border-left-color: rgba(0, 0, 0, 0.1);
+            background-color: rgba(150, 58, 133, 0.05);
+            padding: 16px 26px;
+            margin: 0 0 20px 0;
+        }
 
-    .icon-button {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      border-radius: 5px;
-      background: #eee;
-      padding: 10px 20px;
-      margin: 10px 0;
-    }
+        .tile h3 {
+            font-size: 24px;
+            font-weight: normal;
+            color: rgba(0, 0, 0, 0.45);
+            margin: 0 0 10px 0;
+        }
 
-    .icon-button img {
-      margin-right: 10px;
-    }
+        .tile p {
+            font-weight: 400;
+            font-size: 50px;
+            color: rgba(0, 0, 0, 0.75);
+            margin: 0;
+        }
 
-    .tile {
-      text-align: left;
-      border-left: 3px solid;
-      border-left-color: rgba(0, 0, 0, 0.1);
-      background-color: rgba(150, 58, 133, 0.05);
-      padding: 16px 26px;
-      margin: 0 0 20px 0;
-    }
+        input[type=checkbox] {
+            display: inline-block;
+            margin-right: 10px;
+        }
 
-    .tile h3 {
-      font-size: 24px;
-      font-weight: normal;
-      color: rgba(0, 0, 0, 0.45);
-      margin: 0 0 10px 0;
-    }
+        footer {
+            background: #fff;
+            border-top: 1px solid #eee;
+        }
 
-    .tile p {
-      font-weight: 400;
-      font-size: 50px;
-      color: rgba(0, 0, 0, 0.75);
-      margin: 0;
-    }
+        @media (min-height: 775px) {
+            footer {
+                position: absolute;
+                bottom: 0;
+                left: 0;
+                width: 100%;
+            }
+        }
 
-    input[type=checkbox] {
-      display: inline-block;
-      margin-right: 10px;
-    }
+        footer > .inner {
+            text-align: center;
+            padding: 30px;
+        }
 
-    footer {
-      background: #fff;
-      border-top: 1px solid #eee;
-    }
+        footer p {
+            margin: 0 0 10px 0;
+        }
 
-    @media (min-height: 775px) {
-      footer {
-        position: absolute;
-        bottom: 0;
-        left: 0;
-        width: 100%;
-      }
-    }
+        .type-s {
+            font-size: 14px !important;
+        }
 
-    footer > .inner {
-      text-align: center;
-      padding: 30px;
-    }
+        .type-lg {
+            font-size: 18px !important;
+        }
 
-    footer p {
-      margin: 0 0 10px 0;
-    }
+        .type-xl {
+            font-size: 22px !important;
+        }
 
-    .type-s { font-size: 14px !important; }
-    .type-lg { font-size: 18px !important; }
-    .type-xl { font-size: 22px !important; }
-    .type-xxl { font-size: 28px !important; }
-    .type-xxxl { font-size: 32px !important; }
+        .type-xxl {
+            font-size: 28px !important;
+        }
 
-  </style>
+        .type-xxxl {
+            font-size: 32px !important;
+        }
+
+    </style>
 </head>
 <body>
-  <div id="loading" class="center">
+<div id="loading">
     Loading...
-  </div>
-  <div id="content" class="hide">
+</div>
+<div id="content" class="hide">
 
     <div class="columns">
-      <div class="info">
-        <h1 class="type-xxxl">Kuma Counter Demo <span id="version"></span></h1>
-        <p class="type-xl">
-          Welcome to a simple demo application to demonstrate how the Kuma service mesh works. This application allows us
-          to increment a counter, and it is made of two different services:
-        </p>
-        <ul class="type-xl">
-          <li><strong>demo-app:</strong> To serve the backend API and this frontend</li>
-          <li><strong>redis:</strong> To store the counter value</li>
-        </ul>
-        <p>
-          <img class="diagram" src="./demo-app-diagram.png" alt="Kuma Counter Demo App diagram">
-        </p>
-      </div>
-      <div class="controls-container">
-
-        <div class="controls">
-          <div>
-            <button id="increment" class="button type-xxxl">Increment</button>
-          </div>
-          <div>
-            <button id="reset" class="button type-xxxl">Reset</button>
-          </div>
-        </div>
-
-        <div class="auto-increment-container">
-          <input type="checkbox" id="autoincrement" value="value" />
-          <label for="autoincrement" class="type-xl">Auto Increment</label>
-        </div>
-
-        <div class="output">
-          <span id="status"></span>
-          
-          <div class="tile">
-            <h3>Counter</h3>
-            <p>
-              <span id="counter"></span>
+        <div class="info">
+            <h1 class="type-xxxl">Kuma Counter Demo <span id="version"></span></h1>
+            <p class="type-xl">
+                Welcome to a simple demo application to demonstrate how the Kuma service mesh works. This application
+                allows us
+                to increment a counter, and it is made of two different services:
             </p>
-          </div>
-
-          <div class="tile">
-            <h3>Zone</h3>
+            <ul class="type-xl">
+                <li><strong>demo-app:</strong> To serve the backend API and this frontend</li>
+                <li><strong>redis:</strong> To store the counter value</li>
+            </ul>
             <p>
-              <span id="zone"></span>
+                <img class="diagram" src="./demo-app-diagram.png" alt="Kuma Counter Demo App diagram">
             </p>
-          </div>
-          <div>
-              redis errors: <span id="redis-error-count">0</span>
-          </div>
-          <div>
-              demo-app errors: <span id="app-error-count">0</span>
-          </div>
-
         </div>
-      </div>
+        <div class="controls-container">
+
+            <div class="controls">
+                <div>
+                    <button id="increment" class="button type-xxxl">Increment</button>
+                </div>
+                <div>
+                    <button id="reset" class="button type-xxxl">Reset</button>
+                </div>
+            </div>
+
+            <div class="auto-increment-container">
+                <input type="checkbox" id="autoincrement" value="value"/>
+                <label for="autoincrement" class="type-xl">Auto Increment</label>
+            </div>
+
+            <div class="output">
+                <span id="status"></span>
+
+                <div class="tile">
+                    <h3>Counter</h3>
+                    <p>
+                        <span id="counter"></span>
+                    </p>
+                </div>
+
+                <div class="tile">
+                    <h3>Zone</h3>
+                    <p>
+                        <span id="zone"></span>
+                    </p>
+                </div>
+                <div>
+                    redis errors: <span id="redis-error-count">0</span>
+                </div>
+                <div>
+                    demo-app errors: <span id="app-error-count">0</span>
+                </div>
+
+            </div>
+        </div>
     </div>
 
     <footer>
-      <div class="inner">
-        <p>
-          You can find the source code for this demo at
-        </p>
-        <p>
-          <a href="https://github.com/kumahq/kuma-counter-demo" class="icon-button" target="_blank">
-            <img src="./github.svg" alt="GitHub logo" class="icon">
-            <span>https://github.com/kumahq/kuma-counter-demo</span>
-          </a>
-        </p>
-      </div>
+        <div class="inner">
+            <p>
+                You can find the source code for this demo at
+            </p>
+            <p>
+                <a href="https://github.com/kumahq/kuma-counter-demo" class="icon-button" target="_blank">
+                    <img src="./github.svg" alt="GitHub logo" class="icon">
+                    <span>https://github.com/kumahq/kuma-counter-demo</span>
+                </a>
+            </p>
+        </div>
     </footer>
-  </div>
+</div>
+<script type="text/javascript">
+    let running = false;
+    const $status = $("#status");
+    const $zone = $("#zone");
+    const $counter = $("#counter");
+    const $redisErrors = $("#redis-error-count");
+    const $appErrors = $("#app-error-count");
+    const $autoincrement = $("#autoincrement");
+    const $increment = $("#increment");
+    const $reset = $("#reset");
+    const $header = $("#header");
+    const $version = $("#version");
+    const $loading = $("#loading");
+    const $content = $("#content");
+
+    const handleError = (data) => {
+        if (data.type && data.type === "https://github.com/kumahq/kuma-counter-demo/blob/master/ERRORS.md#REDIS-FAILURE") {
+            $status.text(`Redis Error: ${JSON.stringify(data)}`);
+            $redisErrors.text(parseInt($redisErrors.text()) + 1);
+            $counter.text("-");
+            $zone.text("-");
+        } else {
+            $status.text("Error: ", JSON.stringify(data));
+            $appErrors.text(parseInt($appErrors.text()) + 1);
+        }
+        $status.addClass("error");
+    }
+
+    const increment = () => {
+        if (running) {
+            return;
+        }
+        running = true;
+        fetch('/api/counter', {method: "POST"}).then((response) => {
+            return response.json().then(data => {
+                if (!response.ok) {
+                    handleError(data);
+                    return;
+                }
+                $status.removeClass("error");
+                $status.text("Everything is working");
+                $counter.text(data.counter);
+                $zone.text(data.zone || "unknown");
+            });
+        }).catch((error) => {
+            $status.addClass("error");
+            $status.text(`core error:${JSON.stringify(error)}`);
+        });
+        running = false;
+    }
+    Promise.all([
+        (async () => {
+            const response = await fetch('/api/version');
+            const data = await response.json();
+            if (!response.ok) {
+                handleError(data);
+                return;
+            }
+            $header.css("background-color", data.color);
+            $version.text(data.version);
+        })(),
+        (async () => {
+            const response = await fetch('/api/counter');
+            const data = await response.json();
+            if (!response.ok) {
+                handleError(data);
+                return;
+            }
+            $counter.text(data?.counter || "0");
+            $zone.text(data?.zone || "unknown");
+        })()
+    ]).then(() => {
+        $loading.addClass("hide");
+        $content.removeClass("hide");
+    }).catch((error) => {
+        $content.removeClass("hide");
+        $status.addClass("error");
+        $status.text("core error:" + error);
+    });
+    $autoincrement.click(() => {
+        if ($autoincrement.is(":checked")) {
+            $increment.prop("disabled", true);
+            $reset.prop("disabled", true);
+            interval = setInterval(increment, 10);
+        } else {
+            clearInterval(interval);
+            $increment.prop("disabled", false);
+            $reset.prop("disabled", false);
+            $autoincrement.prop("checked", false);
+        }
+    });
+    $increment.click(increment);
+    $reset.click(() => {
+        if (running) {
+            return;
+        }
+        running = true;
+
+        fetch('/api/counter', {method: 'DELETE'}).then(async response => {
+            const data = await response.json();
+            if (!response.ok) {
+                handleError(data);
+                return;
+            }
+            $status.removeClass("error");
+            $status.text("Everything is working")
+            $counter.text(data.counter);
+            $zone.text(data.zone || "unknown");
+        }).catch((error) => {
+            $status.addClass("error");
+            $status.text("core error:" + error);
+        });
+        running = false;
+    });
+</script>
 </body>
 </html>
-

@@ -1,0 +1,171 @@
+openapi: 3.0.3
+info:
+  title: Counter and Zone API
+  description: This API provides operations for managing a counter and retrieving zone data.
+  version: 1.0.0
+servers:
+  - url: http://localhost:5000/api
+    description: Local development server
+paths:
+  /counter:
+    post:
+      operationId: post-counter
+      summary: Increment the counter
+      description: Increments the Redis counter and retrieves the zone data.
+      responses:
+        '200':
+          description: Successful increment of the counter
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PostCounterResponse"
+        '500':
+          description: A bad failure
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    get:
+      operationId: get-counter
+      summary: Get the current counter value
+      description: Retrieves the current value of the counter and zone data.
+      responses:
+        '200':
+          description: Successful retrieval of the counter value
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GetCounterResponse"
+        '500':
+          description: A bad failure
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    delete:
+      operationId: delete-counter
+      summary: Reset the counter
+      description: Deletes the counter from Redis and retrieves zone data.
+      responses:
+        '200':
+          description: Successful reset of the counter
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DeleteCounterResponse"
+        '500':
+          description: A bad failure
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /version:
+    get:
+      operationId: get-version
+      summary: Get the application version and color
+      description: Retrieves the application version and color settings.
+      responses:
+        '200':
+          description: Successful retrieval of version and color information
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VersionResponse"
+        '500':
+          description: A bad failure
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+components:
+  schemas:
+    InvalidParameters:
+      type: object
+      title: Invalid Parameters
+      properties:
+        field:
+          type: string
+        reason:
+          type: string
+        rule:
+          type: string
+        choices:
+          type: array
+          items:
+            type: string
+    Error:
+      type: object
+      title: Error
+      description: standard error
+      x-examples:
+        Example 1:
+          status: 404
+          title: Not Found
+          type: https://kongapi.info/kuma-counter-demo/not-found
+          instance: 'portal:trace:2287285207635123011'
+          detail: The requested document was not found
+      required:
+        - status
+        - title
+        - instance
+      properties:
+        status:
+          type: integer
+          description: The HTTP status code.
+          example: 404
+        title:
+          type: string
+          description: The error response code.
+          example: Not Found
+        type:
+          type: string
+          description: The error type.
+          example: Not Found
+        instance:
+          type: string
+          example: 'portal:trace:2287285207635123011'
+          description: The portal traceback code
+        detail:
+          type: string
+          example: The requested team was not found
+          description: Details about the error.
+        invalid_parameters:
+          type: array
+          description: TODO
+          items:
+            $ref: "#/components/schemas/InvalidParameters"
+    Counter:
+      type: object
+      required: [counter, zone]
+      properties:
+        counter:
+          type: integer
+          description: The incremented counter value
+        zone:
+          type: string
+          description: Zone data from Redis
+      x-examples:
+        Example1:
+          counter: 23
+          zone: us-west
+    PostCounterResponse:
+      $ref: "#/components/schemas/Counter"
+    GetCounterResponse:
+      $ref: "#/components/schemas/Counter"
+    DeleteCounterResponse:
+      $ref: "#/components/schemas/Counter"
+    VersionResponse:
+      type: object
+      required: [version, color]
+      properties:
+        version:
+          type: string
+          description: Application version
+        color:
+          type: string
+          description: Application color in HEX format
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer

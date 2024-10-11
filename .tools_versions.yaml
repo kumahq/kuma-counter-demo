@@ -1,0 +1,7 @@
+---
+# renovate: datasource=github-releases depName=golangci/golangci-lint
+golangci-lint: 1.61.0
+# removate: datasource=github-releases depName=github.com/goreleaser/goreleaser/v2
+goreleaser: 2.3.2
+# removate: datasource=github-releases denName=com/oapi-codegen/oapi-codegen/v2/cmd/oapi-codegen
+oapi-codegen: 2.4.1

@@ -1,16 +1,8 @@
 ARG ARCH=amd64
-FROM --platform=linux/${ARCH} node:alpine
+FROM golang:1.19
 
-RUN apk add dumb-init
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=${ARCH} go build ./... -o /kuma-counter-demo
 
-COPY /app/package.json /app/package.json
-RUN npm install --prefix /app
+FROM --platform=linux/${ARCH} distroless
 
-COPY /app/public /app/public
-COPY /app/server.js /app/server.js
-
-EXPOSE 5000
-
-WORKDIR "/app"
-ENTRYPOINT ["dumb-init", "--"]
-CMD ["node", "./server.js"]
+CMD ["/kuma-counter-demo"]
