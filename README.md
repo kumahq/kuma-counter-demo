@@ -8,7 +8,7 @@
 
 Welcome to a sample application that demonstrates the [Kuma](https://kuma.io) service mesh in action. Kuma is designed to work across Kubernetes and VMs environments, with support for multi-zone deployments across many different clusters, data centers, and clouds.
 
-To learn more about Kuma, see [the Kuma repository](https://github.com/kumahq/kuma).
+To learn more about Kuma, see [the Kuma docs](https://kuma.io/docs/latest).
 
 Kuma is a CNCF Sandbox project.
 
@@ -27,149 +27,10 @@ The `zone` key is purely static and arbitrary, but by having different `zone` va
 
 ### Run the application
 
-1.  Run `redis`
+To run the `kuma-counter-demo` follow one of these guides:
 
-    - (Kubernetes setup) on the default port `6379`  and set a default `zone` name:
-
-    ```sh
-    redis-server
-    redis-cli set zone local
-    ```
-
-    - (Universal setup) on port `26379` and set a default `zone` name:
-
-     ```sh
-    redis-server --port 26379
-    redis-cli -p 26379 set zone local
-    ```
-
-2.  Install and start `demo-app` on the default port `5000`:
-
-    ```sh
-    npm install --prefix=app/
-    npm start --prefix=app/
-    ```
-
-3.  (Only for Kubernetess) Navigate to [`127.0.0.1:5000`](http://127.0.0.1:5000) and increment the counter!
-
-
-### Run in Universal
-
-1. First we need to generate two tokens:
- - One for redis
- - Second for node-app
-To do so we need to run:
-
-    ```sh
-    kumactl generate dataplane-token --name=redis > kuma-token-redis
-    kumactl generate dataplane-token --name=app > kuma-token-app
-    ```
-
-2. Then we need to generate two DPPs:
-- For redis:
-
-```sh
-kuma-dp run \
-   --cp-address=https://localhost:5678/ \
-   --dns-enabled=false \
-   --dataplane-token-file=kuma-token-redis \
-   --dataplane="type: Dataplane
-mesh: default
-name: redis
-networking:
-  address: 127.0.0.1 # Or any public address (needs to be reachable by every other dp in the zone) 
-  inbound:
-    - port: 16379
-      servicePort: 26379
-      tags:
-        kuma.io/service: redis
-        kuma.io/protocol: tcp"
-```
-
-
-- And for app:
-
-```sh
-kuma-dp run \
-  --cp-address=https://localhost:5678/ \
-  --dns-enabled=false \
-  --dataplane-token-file=kuma-token-app \
-  --dataplane="type: Dataplane
-mesh: default
-name: app
-networking:
-  address: 127.0.0.1 # Or any public address (needs to be reachable by every other dp in the zone) 
-  outbound:
-    - port: 6379
-      tags:
-        kuma.io/service: redis
-  inbound:
-    - port: 15000
-      servicePort: 5000
-      tags:
-        kuma.io/service: app
-        kuma.io/protocol: http
-  admin:
-    port: 9902"
-```
-
-3.  Navigate to [`127.0.0.1:5000`](http://127.0.0.1:5000) and increment the counter!
-
-### Run in Kubernetes
-
-Two different YAML files are provided for Kubernetes:
-
-- one that installs the basic resources
-- one that installs a version of the frontend service with different colors (useful to demonstrate routing across multiple versions, for example)
-
-1.  Install the basic demo resources in a `kuma-demo` namespace:
-
-    ```sh
-    kubectl apply -f demo.yaml
-    ```
-
-1.  Port-forward the service to the namespace on port `5000`:
-
-    ```sh
-    kubectl port-forward svc/demo-app -n kuma-demo 5000:5000
-    ```
-
-1.  Navigate to [`127.0.0.1:5000`](http://127.0.0.1:5000) and increment the counter!
-
-#### `MeshGateway`
-
-An additional YAML file `gateway.yaml` is provided for setting up a
-[Kuma `MeshGateway`](https://kuma.io/docs/1.7.x/explore/gateway/#builtin) to
-serve the demo app.
-
-1.  Install the `MeshGateway` resources:
-
-    ```sh
-    kubectl apply -f gateway.yaml
-    ```
-
-1. If your k8s environment supports `LoadBalancer` `Services`, you can access
-   the gateway via its external IP:
-
-   ```
-   curl $(kubectl get svc -n kuma-demo demo-app-gateway -o=jsonpath='{.status.loadBalancer.ingress[0].ip}')
-   ```
-
-   Otherwise you can access the gateway inside the cluster via its cluster IP:
-
-   ```
-   kubectl run curl-gateway --rm -i --tty --image nicolaka/netshoot --restart=OnFailure -- curl $(kubectl get svc -n kuma-demo demo-app-gateway -o=jsonpath='{.spec.clusterIP}')
-   ```
-
-### Run v2 (Kubernetes)
-
-To install the `v2` version of the demo application, we can apply the following YAML file instead, which will change the colors and version number of our frontend application:
-
-```sh
-kubectl apply -f demo-v2.yaml
-```
-
-By inspecting the file we can see that the `demo-v2.yaml` file sets the following environment variables - which are also available on VMs - to different values so that we have immediate visual feedback that a new version is runnning.
+- [Kubernetes quickstart demo](https://kuma.io/docs/latest/quickstart/kubernetes-demo/)
+- [Universal quickstart demo](https://kuma.io/docs/latest/quickstart/universal-demo/)
 
 ### Environment Variables
 
