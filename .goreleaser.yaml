@@ -47,6 +47,7 @@ dockers:
       - ghcr.io/kumahq/kuma-counter-demo
     dockerfile: ./app/Dockerfile
     build_flag_templates:
+      - "--label=org.opencontainers.image.source=https://github.com/kumahq/kuma-counter-demo"
       - "--label=org.opencontainers.image.created={{.Date}}"
       - "--label=org.opencontainers.image.created={{.Date}}"
       - "--label=org.opencontainers.image.title={{.ProjectName}}"
