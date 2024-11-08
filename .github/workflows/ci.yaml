@@ -21,9 +21,9 @@ jobs:
       - uses: actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882 # v4.4.3
         with:
           path: |
-            *.tar.gz
-            metadata.json
-            config.yaml
-            artifacts.json
-            *_checksums.txt
+            dist/*.tar.gz
+            dist/metadata.json
+            dist/config.yaml
+            dist/artifacts.json
+            dist/*_checksums.txt
           retention-days: 5
