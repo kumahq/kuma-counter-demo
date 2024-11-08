@@ -57,7 +57,7 @@ tidy:
 
 .PHONY: golangci-lint
 golangci-lint: | golangci-lint.download
-	$(GOLANGCI_LINT) run --verbose --config $(PWD)/.golangci.yaml $(GOLANGCI_LINT_FLAGS)
+	$(GOLANGCI_LINT) run --verbose --config .golangci.yaml $(GOLANGCI_LINT_FLAGS)
 
 build: | goreleaser.download
 	$(GORELEASER) release --snapshot --clean
