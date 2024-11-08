@@ -44,8 +44,14 @@ changelog:
 dockers:
   - id: demo-app
     image_templates:
-      - kumahq/kuma-counter-demo
+      - ghcr.io/kumahq/kuma-counter-demo
     dockerfile: ./app/Dockerfile
+    build_flag_templates:
+      - "--label=org.opencontainers.image.created={{.Date}}"
+      - "--label=org.opencontainers.image.created={{.Date}}"
+      - "--label=org.opencontainers.image.title={{.ProjectName}}"
+      - "--label=org.opencontainers.image.revision={{.FullCommit}}"
+      - "--label=org.opencontainers.image.version={{.Version}}"
 
 release:
   draft: true
