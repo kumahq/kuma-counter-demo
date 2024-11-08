@@ -46,3 +46,6 @@ dockers:
     image_templates:
       - kumahq/kuma-counter-demo
     dockerfile: ./app/Dockerfile
+
+release:
+  draft: true
