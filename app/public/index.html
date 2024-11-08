@@ -158,7 +158,7 @@
         }
 
         .controls-container {
-
+            max-width: 650px;
         }
 
         .controls {
@@ -322,7 +322,7 @@
             </div>
 
             <div class="output">
-                <span id="status"></span>
+                <div id="status"></div>
 
                 <div class="tile">
                     <h3>Counter</h3>
@@ -379,12 +379,12 @@
 
     const handleError = (data) => {
         if (data.type && data.type === "https://github.com/kumahq/kuma-counter-demo/blob/master/ERRORS.md#REDIS-FAILURE") {
-            $status.text(`Redis Error: ${JSON.stringify(data)}`);
+            $status.text(`Redis Error:\n${JSON.stringify(data, null, 2)}`);
             $redisErrors.text(parseInt($redisErrors.text()) + 1);
             $counter.text("-");
             $zone.text("-");
         } else {
-            $status.text("Error: ", JSON.stringify(data));
+            $status.text(`Error:\n${JSON.stringify(data, null, 2)}`);
             $appErrors.text(parseInt($appErrors.text()) + 1);
         }
         $status.addClass("error");
