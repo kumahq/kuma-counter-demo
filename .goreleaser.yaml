@@ -47,7 +47,9 @@ changelog:
 dockers:
   - id: demo-app
     image_templates:
-      - ghcr.io/kumahq/kuma-counter-demo
+      - ghcr.io/kumahq/kuma-counter-demo:{{ .Tag }}
+      - ghcr.io/kumahq/kuma-counter-demo:{{ .Major }}
+      - ghcr.io/kumahq/kuma-counter-demo:latest
     dockerfile: ./app/Dockerfile
     build_flag_templates:
       - "--label=org.opencontainers.image.source=https://github.com/kumahq/kuma-counter-demo"
