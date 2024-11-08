@@ -208,3 +208,14 @@ curl localhost:5001/increment -XPOST -H "x-set-response-status-code: 503"
 ### ErrorCodes
 
 #### Error Redis failure
+
+## Developing
+
+You'll only need [mise](https://mise.jdx.dev).
+
+```shell
+make clean
+make generate
+make test
+make build
+```
