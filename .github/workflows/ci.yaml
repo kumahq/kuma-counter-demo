@@ -7,7 +7,7 @@ on: # yamllint disable-line rule:truthy
       - main
       - next
 jobs:
-  lint:
+  ci:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -18,3 +18,12 @@ jobs:
       - run: make check
       - run: make build
       - run: make test
+      - uses: actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882 # v4.4.3
+        with:
+          path: |
+            *.tar.gz
+            metadata.json
+            config.yaml
+            artifacts.json
+            *_checksums.txt
+          retention-days: 5
