@@ -12,9 +12,11 @@ import (
 	"net/url"
 	"path"
 	"strings"
+	"time"
 
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/gorilla/mux"
+	"github.com/oapi-codegen/runtime"
 )
 
 // Counter defines model for Counter.
@@ -61,6 +63,33 @@ type InvalidParameters struct {
 	Rule    *string   `json:"rule,omitempty"`
 }
 
+// KV defines model for KV.
+type KV struct {
+	UpdatedAt *time.Time `json:"updatedAt,omitempty"`
+	UpdatedBy *string    `json:"updatedBy,omitempty"`
+	Value     string     `json:"value"`
+}
+
+// KVDeleteResponse defines model for KVDeleteResponse.
+type KVDeleteResponse = KV
+
+// KVGetResponse defines model for KVGetResponse.
+type KVGetResponse = KV
+
+// KVListResponse defines model for KVListResponse.
+type KVListResponse struct {
+	Keys []string `json:"keys"`
+}
+
+// KVPostRequest defines model for KVPostRequest.
+type KVPostRequest struct {
+	Expect *string `json:"expect,omitempty"`
+	Value  string  `json:"value"`
+}
+
+// KVPostResponse defines model for KVPostResponse.
+type KVPostResponse = KV
+
 // PostCounterResponse defines model for PostCounterResponse.
 type PostCounterResponse = Counter
 
@@ -73,6 +102,9 @@ type VersionResponse struct {
 	Version string `json:"version"`
 }
 
+// KvPostJSONRequestBody defines body for KvPost for application/json ContentType.
+type KvPostJSONRequestBody = KVPostRequest
+
 // ServerInterface represents all server handlers.
 type ServerInterface interface {
 	// Reset the counter
@@ -84,6 +116,18 @@ type ServerInterface interface {
 	// Increment the counter
 	// (POST /counter)
 	PostCounter(w http.ResponseWriter, r *http.Request)
+	// Returns all values currently available
+	// (GET /key-value)
+	KvList(w http.ResponseWriter, r *http.Request)
+	// delete a value in a kv
+	// (DELETE /key-value/{key})
+	KvDelete(w http.ResponseWriter, r *http.Request, key string)
+	// Returns the value for a key or 404 if not found
+	// (GET /key-value/{key})
+	KvGet(w http.ResponseWriter, r *http.Request, key string)
+	// Set a value of a kv
+	// (POST /key-value/{key})
+	KvPost(w http.ResponseWriter, r *http.Request, key string)
 	// Get the application version and color
 	// (GET /version)
 	GetVersion(w http.ResponseWriter, r *http.Request)
@@ -131,6 +175,95 @@ func (siw *ServerInterfaceWrapper) PostCounter(w http.ResponseWriter, r *http.Re
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.PostCounter(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// KvList operation middleware
+func (siw *ServerInterfaceWrapper) KvList(w http.ResponseWriter, r *http.Request) {
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.KvList(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// KvDelete operation middleware
+func (siw *ServerInterfaceWrapper) KvDelete(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+
+	// ------------- Path parameter "key" -------------
+	var key string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "key", mux.Vars(r)["key"], &key, runtime.BindStyledParameterOptions{Explode: false, Required: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "key", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.KvDelete(w, r, key)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// KvGet operation middleware
+func (siw *ServerInterfaceWrapper) KvGet(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+
+	// ------------- Path parameter "key" -------------
+	var key string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "key", mux.Vars(r)["key"], &key, runtime.BindStyledParameterOptions{Explode: false, Required: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "key", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.KvGet(w, r, key)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// KvPost operation middleware
+func (siw *ServerInterfaceWrapper) KvPost(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+
+	// ------------- Path parameter "key" -------------
+	var key string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "key", mux.Vars(r)["key"], &key, runtime.BindStyledParameterOptions{Explode: false, Required: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "key", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.KvPost(w, r, key)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -273,6 +406,14 @@ func HandlerWithOptions(si ServerInterface, options GorillaServerOptions) http.H
 
 	r.HandleFunc(options.BaseURL+"/counter", wrapper.PostCounter).Methods("POST")
 
+	r.HandleFunc(options.BaseURL+"/key-value", wrapper.KvList).Methods("GET")
+
+	r.HandleFunc(options.BaseURL+"/key-value/{key}", wrapper.KvDelete).Methods("DELETE")
+
+	r.HandleFunc(options.BaseURL+"/key-value/{key}", wrapper.KvGet).Methods("GET")
+
+	r.HandleFunc(options.BaseURL+"/key-value/{key}", wrapper.KvPost).Methods("POST")
+
 	r.HandleFunc(options.BaseURL+"/version", wrapper.GetVersion).Methods("GET")
 
 	return r
@@ -281,24 +422,30 @@ func HandlerWithOptions(si ServerInterface, options GorillaServerOptions) http.H
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"H4sIAAAAAAAC/+xW32/bNhD+Vwhuj4olO81a6C1rstbAsBppUAwrguEsnW02EqmRJ7dpof99IKkftsU4",
-	"GbAAecgbJR7Ju+/7jh9/8EyVlZIoyfD0BzfZBktww7eqloTaDiutKtQk0E1kw0SOJtOiIqEkT/n1BpmQ",
-	"mcYSJWHO2kC2haJGHnG6q5CnXEjCNWreRPy7kjje5y8lkeVAwFZalewKc2GG5Ya0kGveNBHX+E8tNOY8",
-	"/dxn1W5608er5RfMiEf82wl+g7IqfBWXfjzdq2h22uXEa3PyFQ3xxh50gQUStohcoamUNPiCTBPxS61V",
-	"oGBDIHPQOUM3Hx0AlSOBKMbLLtx/w2CpamK0Qb9+wiPeZtiCaetDY6EkhJJ9BcOkIrZStczHgERcSJtR",
-	"hmFqKqUJCkYaMlxCdssylePemT4idRHpbPbm9ezN2Sx5/cvp2XR2mkyn4TO3UIj87wo0lEioTeD0Dxcf",
-	"eMQFYelmf9a44in/KR7aMm57Mp77/RbDdk1/KmgNd/bbEFBtwmW+v75eMB/gKtyD9VXyKqRDElTcg5qj",
-	"hum2G8Y78j8Usd/uY8T/uH9fO//o7Q4U34LQZb9D/01fUavcRzYDm+7K9kCCucpq29gjGQ6qe4yAOuo8",
-	"E22WgaI3RJVJ4/hWyTVUYiLkSsW3dQknbbee5FiqWCo68Ym4Rn2H9HJ/je+vcVONUdkokflh36f3yHno",
-	"w5XAIg9GagRjwQhN1b7Xxnh0cmjTZTv5HsLRRHyhzAvZAbI/oTZCyWOYFCE3O6+qQmRgv5gLYUKy95d/",
-	"spXSJVDoetv6o47v1QU9BMoQ5xMcoWIXGMxqLejuo7ULX86vCBr1eU2b/m1nFy3d7/0LxQNkr5KQIIRh",
-	"54s5q7TaihwNs5i5EoyFgJUgYS3kmkEvFpA500ha4NZOfO+0MOGDmN/uxDqxnC/mfAc6Pp0kk8SiqSqU",
-	"UAme8tNJMjm17wmgjasx3tOxfaaFnhX2v3EPii7BQZO7uaLZT7UvdJ73+7ztJdp5n0tkliReQpJQkh3C",
-	"QHX8pe15b+YPWX34veko2q/sY51laMyqLqwRIzG12q3SYnf2P+blPTOQxzlbQs5WIIpao5djXZag73jK",
-	"r1xiB1mtkcY8XfUkuOhaa+uq7t45KMxxdoSpwe2ekqaApz7EkSsQisNy/N36HNh613HVoj/KsFImQN28",
-	"MwzPnW+swGXQcnuEuh3zekruQh55nLzeE59jk/X472fWRDzesaJHdB2M/cnx533PIJGQaxPsuE+9TT0Z",
-	"a4cO/h/abVyMdTvr33bdc2q9oxT4TQ3qrXusfj5k83eVQcFy3GKhKicIH8sjXuuidfs0jgsbt1GG0rMk",
-	"SWLrrs1N828AAAD//8AWYmcQEgAA",
+	"H4sIAAAAAAAC/+xYbW/bOBL+KwTvgPsiW46TXAt9S18uDVpcg7QoFlsEi4k0tllLpJYcuXEL//cFSVmS",
+	"JcZNgBpwgX6TxCE58zzzqu88VUWpJEoyPPnOTbrAAtzjS1VJQm0fS61K1CTQLaTtQoYm1aIkoSRP+McF",
+	"MiFTjQVKwozVgmwFeYU84rQukSdcSMI5ar6J+DclcXjOn0oiy4CAzbQq2A1mwrTbDWkh53yzibjGvyuh",
+	"MePJ50ar+tDbRl7dfcGUeMTvR3gPRZl7K17755Mdi6anW514ZUZf0RDf2IteYY6ENSI3aEolDf5GZhPx",
+	"11qrgMGGQGagM4ZuPeoBlSGByIfbXrnvhsGdqojRAv3+MY94rWENprUPjYWSEAr2FQyTithMVTIbAhJx",
+	"Ia1GKYapKZUmyBlpSPEO0iVLVYY7d3qJxEkk0+nzZ9Pn59PJs/+enp9MTycnJ+E7V5CL7K8SNBRIqE3g",
+	"9vev3vOIC8LCrf5b44wn/F9xG5ZxHZPxlT/vuj1u09wKWsPavhsCqkzYzDcfP14zL+As3IH1bHIW8kMS",
+	"lD+AmqOG6Toahify/yti/3uIEf/h4XPt+qOP63l8DcJW+w79t41Ftec+MhjYSddtey6YqbSygT1ww9br",
+	"HuNAW+o8E7WWAaMXRKVJ4nip5BxKMRZypuJlVcCojtZRhoWKpaKRV8QF6iXS7/w1zF/DoBqislAi9Y9N",
+	"nD7gzm0czgTmWVBSIxgLRmip8rE2xGPrDrW6rKNvH45NxN9+GlpRlRkQZhdkX2ZKF0A84fbbiESBoRCt",
+	"t7xYB5X13Ae17bLnxW6DWvqy+rA/HqPOl0i/lsLvhNmj8RLXT/Ls3sVue/jea2XvdTlyeC3el1bwQCb7",
+	"q38dkqy+v5PzMDl/Qm2EkvswyUPd50VZ5iIF+8acCBOSvXn9B6vZDjC88lftP2sr9CNQWjmv4JBz26lh",
+	"WmlB6w+2vfPmvEDQqC8qWjSzmN105z7vNgAeIFv6Qw4hDLu4vmKlViuRoWEWM2eCsRCwAiTMhZwzaJwF",
+	"ZMY0kha4sgvftr4w5m3xedmRdc5ycX3FO9Dxk/FkPLFoqhIllIIn/HQ8GZ/a/h9o4WyMd/zY5v/QGGC/",
+	"GzcAbBVsfbKrK5pdVRtDr7LmnJeNi257VafIdDLxLiQJpcsF0FIdf6lrtG++f9Sah+dDR9GuZR+qNEVj",
+	"ZlVuG2ckpmZdKy125z9RL9/jBvS4YHeQsRmIvNLo3bEqCtBrnvAbp1hPqznSkKebhgQnXWltu2CXd3qG",
+	"Oc72MNV2p4ekKdAD/4gjZyDkfXN8bj0Gti63XNXoDzQslQlQd7UtGJ47H1iBZFBzu4e6TvE6JHehGrmf",
+	"vKYmHmOQNfjvaraJeLzE9ahpKYJxZyt+LowzbIlrx5fbYckCYngvDA2Iert65z8fjKNes/mE2LLWHEny",
+	"o0pLwyDPt5DWkZWvGaxA5HCXY4+o+PsS15vditbH3peIw6Lfm6f24+9VjSwPzmLrh6XGlVCVabPH2eTs",
+	"8ISkIP9DbF5nsvruHVq8sgzq4iIkA7ZcdQpTH+5LPLCnd+fAJzj6EtdHBOtNh3uPrG0PwSUVpdnZ5IyJ",
+	"WeeXli0nnT8ln0OJSULRVH9rbfcXXjstCCtum0IecbuDJ9wLt3006QqjDgb9nvu2rW199m2xqM9CQy9U",
+	"tv6JzHcH2wDq1xVt/w0OzNkc1CV3xt79PumAOx4//IDUxLaa1bFtU2xnLHtEBwrDWc3VRj8DGiQScm6C",
+	"3eenZmQ7GEH9afYJWWNojJ387Cxr9x1TG7qXAn+oQb0Kp493KgVbmFaYq9I1R16WR7zSeT35JnGcW7mF",
+	"MpScT84nsZ00N7ebfwIAAP//7WqdyswcAAA=",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file

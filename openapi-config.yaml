@@ -3,4 +3,4 @@ generate:
   gorilla-server: true
   models: true
   embedded-spec: true
-output: app/internal/api/gen.go
+output: pkg/api/gen.go

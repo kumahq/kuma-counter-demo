@@ -299,10 +299,16 @@
             </p>
             <ul class="type-xl">
                 <li><strong>demo-app:</strong> To serve the backend API and this frontend</li>
-                <li><strong>redis:</strong> To store the counter value</li>
+                <li><strong>kv:</strong> To store the counter value</li>
             </ul>
             <p>
-                <img class="diagram" src="./demo-app-diagram.png" alt="Kuma Counter Demo App diagram">
+            <pre class="mermaid">
+                flowchart LR
+
+                demo-app(demo-app :5050)
+                kv(kv :5050)
+                demo-app --> kv
+            </pre>
             </p>
         </div>
         <div class="controls-container">
@@ -338,7 +344,7 @@
                     </p>
                 </div>
                 <div>
-                    redis errors: <span id="redis-error-count">0</span>
+                    kv errors: <span id="kv-error-count">0</span>
                 </div>
                 <div>
                     demo-app errors: <span id="app-error-count">0</span>
@@ -367,7 +373,7 @@
     const $status = $("#status");
     const $zone = $("#zone");
     const $counter = $("#counter");
-    const $redisErrors = $("#redis-error-count");
+    const $kvErrors = $("#kv-error-count");
     const $appErrors = $("#app-error-count");
     const $autoincrement = $("#autoincrement");
     const $increment = $("#increment");
@@ -378,9 +384,9 @@
     const $content = $("#content");
 
     const handleError = (data) => {
-        if (data.type && data.type === "https://github.com/kumahq/kuma-counter-demo/blob/master/ERRORS.md#REDIS-FAILURE") {
-            $status.text(`Redis Error:\n${JSON.stringify(data, null, 2)}`);
-            $redisErrors.text(parseInt($redisErrors.text()) + 1);
+        if (data.type && data.type.startsWith("https://github.com/kumahq/kuma-counter-demo/blob/main/ERRORS.md#KV-")) {
+            $status.text(`KV Error:\n${JSON.stringify(data, null, 2)}`);
+            $kvErrors.text(parseInt($kvErrors.text()) + 1);
             $counter.text("-");
             $zone.text("-");
         } else {
@@ -445,7 +451,7 @@
         if ($autoincrement.is(":checked")) {
             $increment.prop("disabled", true);
             $reset.prop("disabled", true);
-            interval = setInterval(increment, 10);
+            interval = setInterval(increment, 100);
         } else {
             clearInterval(interval);
             $increment.prop("disabled", false);
@@ -476,6 +482,9 @@
         });
         running = false;
     });
+</script>
+<script type="module">
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
 </script>
 </body>
 </html>

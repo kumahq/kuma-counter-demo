@@ -1,11 +1,23 @@
-# Errors
+# Error Codes
 
-The list of error details that can be returned by our app.
+This document provides a list of error codes used in the application.
 
-## REDIS-FAILURE
+## INVALID-JSON
 
-Redis failed in some way
+Invalid JSON
 
-## DEMOAPP-FAILURE
+## INTERNAL-ERROR
 
-Demo-app failed
+A complex error occured
+
+## KV-NOT-FOUND
+
+Couldn't find a kv entry
+
+## KV-DISABLED
+
+You can't use KV or KVUrl is not set. Are you talking to the right service?
+
+## KV-CONFLICT
+
+A conflict when update a key with compare and swap

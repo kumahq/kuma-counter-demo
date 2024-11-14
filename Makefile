@@ -29,12 +29,12 @@ OAPI_CODEGEN = $(PROJECT_DIR)/bin/installs/oapi-codegen/$(OAPI_CODEGEN_VERSION)/
 oapi-codegen.download: | mise ## Download oapi-codegen locally if necessary.
 	$(MISE) install -y -q oapi-codegen@$(OAPI_CODEGEN_VERSION)
 
-app/internal/api/gen.go: openapi.yaml | oapi-codegen.download
-	$(OAPI_CODEGEN) --config openapi-config.yaml $<
+pkg/api/gen.go: openapi-config.yaml openapi.yaml | oapi-codegen.download
+	$(OAPI_CODEGEN) --config openapi-config.yaml openapi.yaml
 
 .PHONY: clean
 clean:
-	@rm -rf app/internal/api/gen.go
+	@rm -rf pkg/api/gen.go
 	@rm -rf dist/
 	@rm -rf bin/
 
@@ -63,7 +63,7 @@ build: | goreleaser.download
 	$(GORELEASER) release --snapshot --clean
 
 .PHONY: generate
-generate: app/internal/api/gen.go
+generate: pkg/api/gen.go
 	go generate ./...
 
 .PHONY: test

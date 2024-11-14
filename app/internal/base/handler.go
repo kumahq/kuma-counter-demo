@@ -1,120 +1,40 @@
 package base
 
 import (
-	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
-	"github.com/kumahq/kuma-counter-demo/app/internal/api"
-	"github.com/redis/go-redis/v9"
+	"github.com/kumahq/kuma-counter-demo/pkg/api"
 	"go.opentelemetry.io/otel/trace"
 	"log/slog"
 	"net/http"
 	"strconv"
+	"sync"
 )
 
-const (
-	COUNTER_KEY = "counter"
-	ZONE_KEY    = "zone"
-)
+func Error(w http.ResponseWriter, r *http.Request, statusCode int, errorType api.ErrorType, err error, format string, args ...any) {
+	s := errorType.QualifiedType()
+	span := trace.SpanFromContext(r.Context())
+	writeResponse(w, r, statusCode, api.Error{Type: &s, Status: statusCode, Instance: span.SpanContext().TraceID().String(), Title: fmt.Sprintf(format, args...)}, err)
+}
 
 type ServerImpl struct {
-	redisClient *redis.Client
-	color       string
-	version     string
+	logger  *slog.Logger
+	kvUrl   string
+	kv      map[string]api.KV
+	color   string
+	version string
+	sync.Mutex
 }
 
-var (
-	DemoAppErrorType = "https://github.com/kumahq/kuma-counter-demo/blob/master/ERRORS.md#DEMOAPP-FAILURE"
-)
-
-func redisError(ctx context.Context, statusCode int, title string) api.Error {
-	redisErrorType := "https://github.com/kumahq/kuma-counter-demo/blob/master/ERRORS.md#REDIS-FAILURE"
-	span := trace.SpanFromContext(ctx)
-	return api.Error{Type: &redisErrorType, Status: statusCode, Instance: span.SpanContext().TraceID().String(), Title: title}
-}
-
-func NewServerImpl(client *redis.Client, version string, color string) api.ServerInterface {
+func NewServerImpl(logger *slog.Logger, kvUrl string, version string, color string) api.ServerInterface {
 	return &ServerImpl{
-		redisClient: client,
-		version:     version,
-		color:       color,
+		logger:  logger,
+		kv:      map[string]api.KV{},
+		kvUrl:   kvUrl,
+		version: version,
+		color:   color,
 	}
 
-}
-
-func (s *ServerImpl) DeleteCounter(w http.ResponseWriter, r *http.Request) {
-	ctx := r.Context()
-	if err := s.redisClient.Del(ctx, COUNTER_KEY).Err(); err != nil {
-		writeResponse(w, r, http.StatusInternalServerError, redisError(ctx, http.StatusInternalServerError, "failed to delete counter"), err)
-		return
-	}
-
-	zone, err := s.redisClient.Get(ctx, ZONE_KEY).Result()
-	if errors.Is(err, redis.Nil) {
-		zone = ""
-	} else if err != nil {
-		writeResponse(w, r, http.StatusInternalServerError, redisError(ctx, http.StatusInternalServerError, "failed to retrieve zone"), err)
-		return
-	}
-
-	response := api.DeleteCounterResponse{
-		Counter: 0,
-		Zone:    zone,
-	}
-
-	writeResponse(w, r, http.StatusOK, response, nil)
-}
-
-func (s *ServerImpl) GetCounter(w http.ResponseWriter, r *http.Request) {
-	ctx := r.Context()
-	counter, err := s.redisClient.Get(ctx, COUNTER_KEY).Result()
-	if errors.Is(err, redis.Nil) {
-		counter = "0"
-	} else if err != nil {
-		writeResponse(w, r, http.StatusInternalServerError, redisError(ctx, http.StatusInternalServerError, "failed to retrieve counter"), err)
-		return
-	}
-
-	zone, err := s.redisClient.Get(ctx, ZONE_KEY).Result()
-	if errors.Is(err, redis.Nil) {
-		zone = ""
-	} else if err != nil {
-		writeResponse(w, r, http.StatusInternalServerError, redisError(ctx, http.StatusInternalServerError, "failed to retrieve zone"), err)
-		return
-	}
-	c, _ := strconv.Atoi(counter)
-
-	response := api.GetCounterResponse{
-		Counter: c,
-		Zone:    zone,
-	}
-
-	writeResponse(w, r, http.StatusOK, response, nil)
-}
-
-func (s *ServerImpl) PostCounter(w http.ResponseWriter, r *http.Request) {
-	ctx := r.Context()
-	counter, err := s.redisClient.Incr(ctx, COUNTER_KEY).Result()
-	if err != nil {
-		writeResponse(w, r, http.StatusInternalServerError, redisError(ctx, http.StatusInternalServerError, "failed to increment counter"), err)
-		return
-	}
-
-	zone, err := s.redisClient.Get(ctx, ZONE_KEY).Result()
-	if errors.Is(redis.Nil, err) {
-		zone = ""
-	} else if err != nil {
-		writeResponse(w, r, http.StatusInternalServerError, redisError(ctx, http.StatusInternalServerError, "failed to retrieve zone"), err)
-		return
-	}
-
-	response := api.PostCounterResponse{
-		Counter: int(counter),
-		Zone:    zone,
-	}
-
-	writeResponse(w, r, http.StatusOK, response, nil)
 }
 
 func (s *ServerImpl) GetVersion(w http.ResponseWriter, r *http.Request) {

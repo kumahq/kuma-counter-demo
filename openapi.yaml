@@ -59,6 +59,88 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
+  /key-value:
+    get:
+      operationId: kv-list
+      summary: Returns all values currently available
+      description: The list of key and values that exist
+      responses:
+        '200':
+          description: Successful retrieval of list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/KVListResponse"
+        '500':
+          description: A bad failure
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /key-value/{key}:
+    parameters:
+      - in: path
+        name: key
+        example: counter
+        schema:
+          type: string
+        required: true
+        description: The name of the key
+    get:
+      operationId: kv-get
+      summary: Returns the value for a key or 404 if not found
+      responses:
+        '200':
+          description: Successful retrieval of key
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/KVGetResponse"
+        '404':
+          description: can't get the value
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    post:
+      operationId: kv-post
+      summary: Set a value of a kv
+      requestBody:
+        description: Put request
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/KVPostRequest'
+      responses:
+        '200':
+          description: Successful post
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/KVPostResponse"
+        '404':
+          description: can't get the value
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    delete:
+      operationId: kv-delete
+      summary: delete a value in a kv
+      responses:
+        '200':
+          description: Successful delete, returns the previous value
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/KVDeleteResponse"
+        '404':
+          description: can't get the value
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
   /version:
     get:
       operationId: get-version
@@ -149,12 +231,45 @@ components:
         Example1:
           counter: 23
           zone: us-west
+    KV:
+      type: object
+      required: [value]
+      properties:
+        value:
+          type: string
+        updatedAt:
+          type: string
+          format: date-time
+        updatedBy:
+          type: string
     PostCounterResponse:
       $ref: "#/components/schemas/Counter"
     GetCounterResponse:
       $ref: "#/components/schemas/Counter"
     DeleteCounterResponse:
       $ref: "#/components/schemas/Counter"
+    KVListResponse:
+      type: object
+      required: [keys]
+      properties:
+        keys:
+          type: array
+          items:
+            type: string
+    KVGetResponse:
+      $ref: "#/components/schemas/KV"
+    KVPostRequest:
+      type: object
+      required: [value]
+      properties:
+        value:
+          type: string
+        expect:
+          type: string
+    KVPostResponse:
+      $ref: "#/components/schemas/KV"
+    KVDeleteResponse:
+      $ref: "#/components/schemas/KV"
     VersionResponse:
       type: object
       required: [version, color]

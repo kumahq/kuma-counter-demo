@@ -3,14 +3,14 @@ package main
 import (
 	"context"
 	"errors"
-	"fmt"
 	"github.com/getkin/kin-openapi/openapi3"
-	"github.com/kumahq/kuma-counter-demo/app/internal/api"
 	"github.com/kumahq/kuma-counter-demo/app/internal/base"
 	"github.com/kumahq/kuma-counter-demo/app/public"
+	"github.com/kumahq/kuma-counter-demo/pkg/api"
 	middleware "github.com/oapi-codegen/nethttp-middleware"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"go.opentelemetry.io/contrib/instrumentation/github.com/gorilla/mux/otelmux"
+	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/exporters/otlp/otlplog/otlploghttp"
 	"go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetrichttp"
@@ -30,17 +30,14 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
-	"github.com/redis/go-redis/v9"
 )
 
 var (
-	version     = "1.0"
-	color       = "#efefef"
-	redisHost   = "127.0.0.1"
-	redisPort   = 6379
-	appAddress  = ""
-	appPort     = "5050"
-	redisClient *redis.Client
+	version    = "1.0"
+	color      = "#efefef"
+	kvUrl      = ""
+	appAddress = ""
+	appPort    = "5050"
 )
 
 // setupOTelSDK bootstraps the OpenTelemetry pipeline.
@@ -174,14 +171,11 @@ func main() {
 	if c := os.Getenv("ADDRESS"); c != "" {
 		appAddress = c
 	}
-	if h := os.Getenv("REDIS_HOST"); h != "" {
-		redisHost = h
-	}
-	if p, err := strconv.Atoi(os.Getenv("REDIS_PORT")); err == nil {
-		redisPort = p
-	}
 	if p := os.Getenv("PORT"); p != "" {
 		appPort = p
+	}
+	if h := os.Getenv("KV_URL"); h != "" {
+		kvUrl = h
 	}
 
 	if err := run(); err != nil {
@@ -201,18 +195,7 @@ func run() (err error) {
 	defer func() {
 		err = errors.Join(err, otelShutdown(context.Background()))
 	}()
-	slog.Info("Connecting to Redis", "host", redisHost, "port", redisPort)
 
-	redisClient = redis.NewClient(&redis.Options{
-		Addr:         fmt.Sprintf("%s:%d", redisHost, redisPort),
-		DialTimeout:  5 * time.Second,
-		ReadTimeout:  5 * time.Second,
-		WriteTimeout: 5 * time.Second,
-		PoolTimeout:  5 * time.Second,
-	})
-	defer func() {
-		err = errors.Join(err, redisClient.Close())
-	}()
 	r := mux.NewRouter()
 
 	swagger, err := api.GetSwagger()
@@ -227,9 +210,10 @@ func run() (err error) {
 			URL: "/api",
 		},
 	}
+	http.DefaultClient = &http.Client{Transport: otelhttp.NewTransport(http.DefaultTransport)}
 
 	// Create an instance of our handler which satisfies the generated interface
-	apiHandler := base.NewServerImpl(redisClient, version, color)
+	apiHandler := base.NewServerImpl(slog.Default(), kvUrl, version, color)
 
 	apiRouter := r.PathPrefix("/api").Subrouter()
 	apiRouter.Use(otelmux.Middleware("api-server"))

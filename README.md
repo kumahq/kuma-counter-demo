@@ -16,10 +16,10 @@ Kuma is a CNCF Sandbox project.
 
 ## Introduction
 
-The application consists of two services:
+The application consists of the same app instantiated differently to simulate 2 services:
 
 - A `demo-app` service that presents a web application that allows us to increment a numeric counter
-- A `redis` service that stores the counter
+- A `kv` service which simulates a database.
 
 
 ```mermaid
@@ -29,16 +29,16 @@ browser
 subgraph kuma-mesh
 edge-gateway
 demo-app(demo-app :5050)
-redis(redis :6379)
+kv(kv :5050)
 end
 edge-gateway --> demo-app
-demo-app --> redis
+demo-app --> kv
 browser --> edge-gateway
 ```
 
-The `demo-app` service presents a browser interface that listens on port `5050`. When it starts, it expects to find a `zone` key in Redis that specifies the name of the datacenter (or cluster) that the current `redis` instance belongs to. This name is then displayed in the `demo-app` GUI.
+The `demo-app` service presents a browser interface that listens on port `5050`.
 
-The `zone` key is purely static and arbitrary, but by having different `zone` values across different `redis` instances, we know at any given time from which Redis instance we are fetching/incrementing our counter when we route across a distributed environment across many zones, clusters and clouds.
+You can set the zone key on the kv `curl -v -XPOST -d '{"value":"zone-1"}' localhost:5050/api/key-value/zone -H 'content-type: application/json'` where `localhost:5050` is your kv service.
 
 ## Run the application
 
@@ -48,8 +48,7 @@ Follow the [getting-started](https://kuma.io/docs/latest/quickstart/kubernetes-d
 
 We can configure the following environment variables when running `demo-app`:
 
-* `REDIS_HOST`: Determines the hostname to use when connecting to Redis. Default is `127.0.0.1`.
-* `REDIS_PORT`: Determines the port to use when connecting to Redis. Default is `6379`.
+* `KV_URL`: The address at which to contact the service. 
 * `APP_VERSION`: Lets you change the version number displayed in the main page of `demo-app`. Default is `1.0`.
 * `APP_COLOR`: Lets you change background color of the `demo-app` main page. Default is `#efefef`.
 
