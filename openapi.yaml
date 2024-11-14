@@ -4,7 +4,7 @@ info:
   description: This API provides operations for managing a counter and retrieving zone data.
   version: 1.0.0
 servers:
-  - url: http://localhost:5000/api
+  - url: http://localhost:5050/api
     description: Local development server
 paths:
   /counter:

@@ -1,0 +1,49 @@
+apiVersion: kuma.io/v1alpha1
+kind: Mesh
+metadata:
+  name: default
+spec:
+  meshServices:
+    mode: Exclusive
+  mtls:
+    backends:
+      - name: ca-1
+        type: builtin
+    enabledBackend: ca-1
+---
+apiVersion: kuma.io/v1alpha1
+kind: MeshTrafficPermission
+metadata:
+  namespace: kuma-demo
+  name: redis
+spec:
+  targetRef:
+    kind: MeshSubset
+    tags:
+      app: redis
+  from:
+    - targetRef:
+        kind: MeshSubset
+        tags:
+          app: demo-app
+          k8s.kuma.io/namespace: kuma-demo
+      default:
+        action: Allow
+---
+apiVersion: kuma.io/v1alpha1
+kind: MeshTrafficPermission
+metadata:
+  namespace: kuma-system
+  name: demo-app
+spec:
+  targetRef:
+    kind: MeshSubset
+    tags:
+      app: demo-app
+  from:
+    - targetRef:
+        kind: MeshSubset
+        tags:
+          kuma.io/service: edge-gateway_kuma-demo_svc
+      default:
+        action: Allow

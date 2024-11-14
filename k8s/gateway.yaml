@@ -3,7 +3,7 @@ apiVersion: kuma.io/v1alpha1
 kind: MeshGateway
 mesh: default
 metadata:
-  name: demo-app
+  name: edge-gateway
 spec:
   conf:
     listeners:
@@ -11,17 +11,17 @@ spec:
       protocol: HTTP
   selectors:
   - match:
-      kuma.io/service: demo-app-gateway_kuma-demo_svc
+      kuma.io/service: edge-gateway_kuma-demo_svc
 ---
 apiVersion: kuma.io/v1alpha1
 kind: MeshHTTPRoute
 metadata:
-  name: demo-app
+  name: demo-app-edge-gateway
   namespace: kuma-system
 spec:
   targetRef:
     kind: MeshGateway
-    name: demo-app
+    name: edge-gateway
   to:
   - targetRef:
       kind: Mesh
@@ -29,7 +29,9 @@ spec:
     - default:
         backendRefs:
         - kind: MeshService
-          name: demo-app_kuma-demo_svc_5000
+          name: demo-app
+          namespace: kuma-demo
+          port: 5050
       matches:
       - path:
           type: PathPrefix
@@ -38,7 +40,7 @@ spec:
 apiVersion: kuma.io/v1alpha1
 kind: MeshGatewayInstance
 metadata:
-  name: demo-app-gateway
+  name: edge-gateway
   namespace: kuma-demo
 spec:
   replicas: 1
