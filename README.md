@@ -49,13 +49,14 @@ Follow the [getting-started](https://kuma.io/docs/latest/quickstart/kubernetes-d
 We can configure the following environment variables when running `demo-app`:
 
 * `KV_URL`: The address at which to contact the service. 
-* `APP_VERSION`: Lets you change the version number displayed in the main page of `demo-app`. Default is `1.0`.
-* `APP_COLOR`: Lets you change background color of the `demo-app` main page. Default is `#efefef`.
+* `APP_VERSION`: Lets you change the version number displayed in the main page of `demo-app` and the header `x-demo-app-version` to all responses.
 
-The `APP_VERSION` and `APP_COLOR` environment variables are handy when we want to create different versions of `demo-app` and get immediate visual feedback when routing across them.
+The `APP_VERSION` environment variables are handy when we want to create different versions of `demo-app` and get immediate visual feedback when routing across them.
 
-[kuma-url]: https://kuma.io/
-[kuma-logo]: https://kuma-public-assets.s3.amazonaws.com/kuma-logo-v2.png
+### K8s manifests
+
+In the [`k8s`](/k8s) folder you can access a simple manifests to run the workloads using: `kubectl apply -f k8s/demo-app.yaml`.
+There are then extra examples to play with Kuma.
 
 ## Modifying responses
 
@@ -85,3 +86,5 @@ make generate
 make test
 make build
 ```
+[kuma-url]: https://kuma.io/
+[kuma-logo]: https://kuma-public-assets.s3.amazonaws.com/kuma-logo-v2.png

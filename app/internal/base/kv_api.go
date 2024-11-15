@@ -10,11 +10,11 @@ import (
 
 func (s *ServerImpl) guardKvApi(w http.ResponseWriter, r *http.Request, present bool) bool {
 	if present && s.kvUrl == "" {
-		Error(w, r, http.StatusBadRequest, api.KV_DISABLED, nil, "kv api url is not set")
+		s.writeErrorResponse(w, r, http.StatusBadRequest, api.KV_DISABLED, nil, "kv api url is not set")
 		return true
 	}
 	if !present && s.kvUrl != "" {
-		Error(w, r, http.StatusBadRequest, api.KV_DISABLED, nil, "kv api endpoints disabled")
+		s.writeErrorResponse(w, r, http.StatusBadRequest, api.KV_DISABLED, nil, "kv api endpoints disabled")
 		return true
 	}
 	return false
@@ -34,7 +34,7 @@ func (s *ServerImpl) KvList(w http.ResponseWriter, r *http.Request) {
 	response := api.KVListResponse{
 		Keys: keys,
 	}
-	writeResponse(w, r, http.StatusOK, response, nil)
+	s.writeResponse(w, r, http.StatusOK, response, nil)
 }
 
 func (s *ServerImpl) KvDelete(w http.ResponseWriter, r *http.Request, key string) {
@@ -46,12 +46,12 @@ func (s *ServerImpl) KvDelete(w http.ResponseWriter, r *http.Request, key string
 	delete(s.kv, key)
 	s.Unlock()
 	if !exists {
-		Error(w, r, http.StatusNotFound, api.KV_NOT_FOUND, nil, "no key %q", key)
+		s.writeErrorResponse(w, r, http.StatusNotFound, api.KV_NOT_FOUND, nil, "no key %q", key)
 		return
 	}
 
 	response := val
-	writeResponse(w, r, http.StatusOK, response, nil)
+	s.writeResponse(w, r, http.StatusOK, response, nil)
 }
 
 func (s *ServerImpl) KvGet(w http.ResponseWriter, r *http.Request, key string) {
@@ -62,12 +62,12 @@ func (s *ServerImpl) KvGet(w http.ResponseWriter, r *http.Request, key string) {
 	val, exists := s.kv[key]
 	s.Unlock()
 	if !exists {
-		Error(w, r, http.StatusNotFound, api.KV_NOT_FOUND, nil, "no key %q", key)
+		s.writeErrorResponse(w, r, http.StatusNotFound, api.KV_NOT_FOUND, nil, "no key %q", key)
 		return
 	}
 
 	response := val
-	writeResponse(w, r, http.StatusOK, response, nil)
+	s.writeResponse(w, r, http.StatusOK, response, nil)
 }
 
 func (s *ServerImpl) KvPost(w http.ResponseWriter, r *http.Request, key string) {
@@ -77,13 +77,13 @@ func (s *ServerImpl) KvPost(w http.ResponseWriter, r *http.Request, key string) 
 	in := api.KVPostRequest{}
 	err := json.NewDecoder(r.Body).Decode(&in)
 	if err != nil {
-		Error(w, r, http.StatusBadRequest, api.INVALID_JSON, err, "failed to parse: %v", err)
+		s.writeErrorResponse(w, r, http.StatusBadRequest, api.INVALID_JSON, err, "failed to parse: %v", err)
 		return
 	}
 	s.Lock()
 	defer s.Unlock()
 	if in.Expect != nil && s.kv[key].Value != *in.Expect {
-		Error(w, r, http.StatusConflict, api.KV_CONFLICT, nil, "CaS failed for key %q expect %q has %q", key, *in.Expect, s.kv[key].Value)
+		s.writeErrorResponse(w, r, http.StatusConflict, api.KV_CONFLICT, nil, "CaS failed for key %q expect %q has %q", key, *in.Expect, s.kv[key].Value)
 		return
 	}
 	out := api.KV{
@@ -91,5 +91,5 @@ func (s *ServerImpl) KvPost(w http.ResponseWriter, r *http.Request, key string) 
 	}
 	s.kv[key] = out
 	response := out
-	writeResponse(w, r, http.StatusOK, response, nil)
+	s.writeResponse(w, r, http.StatusOK, response, nil)
 }

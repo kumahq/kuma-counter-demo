@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"github.com/kumahq/kuma-counter-demo/pkg/api"
 	"net/http"
+	"net/url"
 	"strconv"
 )
 
@@ -20,20 +21,21 @@ func (s *ServerImpl) DeleteCounter(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	ctx := r.Context()
-	req, _ := http.NewRequestWithContext(ctx, http.MethodDelete, s.kvUrl+"/api/key-value/"+COUNTER_KEY, nil)
+	path, _ := url.JoinPath(s.kvUrl, "/api/key-value", COUNTER_KEY)
+	req, _ := http.NewRequestWithContext(ctx, http.MethodDelete, path, nil)
 	res, err := http.DefaultClient.Do(req)
 	if err != nil {
-		Error(w, r, http.StatusInternalServerError, api.INTERNAL_ERROR, err, "failed sending request")
+		s.writeErrorResponse(w, r, http.StatusInternalServerError, api.INTERNAL_ERROR, err, "failed sending request")
 		return
 	}
 	defer res.Body.Close()
 	if res.StatusCode == http.StatusNotFound {
-		Error(w, r, res.StatusCode, api.KV_NOT_FOUND, err, "Key not found")
+		s.writeErrorResponse(w, r, res.StatusCode, api.KV_NOT_FOUND, err, "Key not found")
 		return
 	}
 	zone, err := s.getKey(ctx, ZONE_KEY)
 	if err != nil {
-		Error(w, r, http.StatusInternalServerError, api.INTERNAL_ERROR, err, "failed to retrieve zone")
+		s.writeErrorResponse(w, r, http.StatusInternalServerError, api.INTERNAL_ERROR, err, "failed to retrieve zone")
 		return
 	}
 
@@ -42,11 +44,12 @@ func (s *ServerImpl) DeleteCounter(w http.ResponseWriter, r *http.Request) {
 		Zone:    zone,
 	}
 
-	writeResponse(w, r, http.StatusOK, response, nil)
+	s.writeResponse(w, r, http.StatusOK, response, nil)
 }
 
 func (s *ServerImpl) getKey(ctx context.Context, key string) (string, error) {
-	req, _ := http.NewRequestWithContext(ctx, http.MethodGet, s.kvUrl+"/api/key-value/"+key, nil)
+	path, _ := url.JoinPath(s.kvUrl, "/api/key-value", key)
+	req, _ := http.NewRequestWithContext(ctx, http.MethodGet, path, nil)
 	res, err := http.DefaultClient.Do(req)
 	if err != nil {
 		return "", err
@@ -70,12 +73,12 @@ func (s *ServerImpl) GetCounter(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	counter, err := s.getKey(ctx, COUNTER_KEY)
 	if err != nil {
-		Error(w, r, http.StatusInternalServerError, api.INTERNAL_ERROR, err, "failed to retrieve zone")
+		s.writeErrorResponse(w, r, http.StatusInternalServerError, api.INTERNAL_ERROR, err, "failed to retrieve zone")
 		return
 	}
 	zone, err := s.getKey(ctx, ZONE_KEY)
 	if err != nil {
-		Error(w, r, http.StatusInternalServerError, api.INTERNAL_ERROR, err, "failed to retrieve zone")
+		s.writeErrorResponse(w, r, http.StatusInternalServerError, api.INTERNAL_ERROR, err, "failed to retrieve zone")
 		return
 	}
 	c := 0
@@ -88,7 +91,7 @@ func (s *ServerImpl) GetCounter(w http.ResponseWriter, r *http.Request) {
 		Zone:    zone,
 	}
 
-	writeResponse(w, r, http.StatusOK, response, nil)
+	s.writeResponse(w, r, http.StatusOK, response, nil)
 }
 
 func (s *ServerImpl) PostCounter(w http.ResponseWriter, r *http.Request) {
@@ -98,7 +101,7 @@ func (s *ServerImpl) PostCounter(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	zone, err := s.getKey(ctx, ZONE_KEY)
 	if err != nil {
-		Error(w, r, http.StatusInternalServerError, api.INTERNAL_ERROR, err, "failed to retrieve zone")
+		s.writeErrorResponse(w, r, http.StatusInternalServerError, api.INTERNAL_ERROR, err, "failed to retrieve zone")
 		return
 	}
 	for i := 0; i < 5; i++ {
@@ -106,7 +109,7 @@ func (s *ServerImpl) PostCounter(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-	Error(w, r, http.StatusConflict, api.KV_CONFLICT, nil, "out of retries without success")
+	s.writeErrorResponse(w, r, http.StatusConflict, api.KV_CONFLICT, nil, "out of retries without success")
 
 }
 
@@ -115,7 +118,7 @@ func (s *ServerImpl) tryIncrementCounter(w http.ResponseWriter, r *http.Request,
 	counter, err := s.getKey(ctx, COUNTER_KEY)
 	if err != nil {
 		s.logger.InfoContext(ctx, "failed to retrieve counter", "error", err)
-		Error(w, r, http.StatusInternalServerError, api.INTERNAL_ERROR, err, "failed to retrieve zone")
+		s.writeErrorResponse(w, r, http.StatusInternalServerError, api.INTERNAL_ERROR, err, "failed to retrieve zone")
 		return true
 	}
 	c := 0
@@ -125,24 +128,25 @@ func (s *ServerImpl) tryIncrementCounter(w http.ResponseWriter, r *http.Request,
 
 	// Now let's update
 	b, _ := json.Marshal(api.KVPostRequest{Value: strconv.Itoa(c + 1), Expect: &counter})
-	req, _ := http.NewRequestWithContext(ctx, http.MethodPost, s.kvUrl+"/api/key-value/"+COUNTER_KEY, bytes.NewReader(b))
+	path, _ := url.JoinPath(s.kvUrl, "/api/key-value", COUNTER_KEY)
+	req, _ := http.NewRequestWithContext(ctx, http.MethodPost, path, bytes.NewReader(b))
 	req.Header.Set("Content-Type", "application/json")
 	res, err := http.DefaultClient.Do(req)
 	if err != nil {
-		Error(w, r, http.StatusInternalServerError, api.INTERNAL_ERROR, err, "failed sending request")
+		s.writeErrorResponse(w, r, http.StatusInternalServerError, api.INTERNAL_ERROR, err, "failed sending request")
 		return true
 	}
 	switch res.StatusCode {
 	case http.StatusConflict:
 		return false
 	case http.StatusNotFound:
-		Error(w, r, res.StatusCode, api.KV_NOT_FOUND, nil, "counter key not found")
+		s.writeErrorResponse(w, r, res.StatusCode, api.KV_NOT_FOUND, nil, "counter key not found")
 		return true
 	case http.StatusOK:
 		counterResponse := api.KVPostResponse{}
 		err = json.NewDecoder(res.Body).Decode(&counterResponse)
 		if err != nil {
-			Error(w, r, http.StatusInternalServerError, api.INTERNAL_ERROR, nil, "failed to parse counter response")
+			s.writeErrorResponse(w, r, http.StatusInternalServerError, api.INTERNAL_ERROR, nil, "failed to parse counter response")
 			return true
 		}
 		c, _ := strconv.Atoi(counterResponse.Value)
@@ -150,10 +154,10 @@ func (s *ServerImpl) tryIncrementCounter(w http.ResponseWriter, r *http.Request,
 			Counter: c,
 			Zone:    zone,
 		}
-		writeResponse(w, r, http.StatusOK, response, nil)
+		s.writeResponse(w, r, http.StatusOK, response, nil)
 		return true
 	default:
-		Error(w, r, res.StatusCode, api.INTERNAL_ERROR, nil, "failed sending request")
+		s.writeErrorResponse(w, r, res.StatusCode, api.INTERNAL_ERROR, nil, "failed sending request")
 		return true
 	}
 

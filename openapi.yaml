@@ -277,9 +277,6 @@ components:
         version:
           type: string
           description: Application version
-        color:
-          type: string
-          description: Application color in HEX format
   securitySchemes:
     BearerAuth:
       type: http

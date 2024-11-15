@@ -16,11 +16,6 @@
             margin: 0;
         }
 
-        #header {
-            padding: 50px;
-            background-color: #efefef;
-        }
-
         #counter {
             /* font-size: 200px; */
             /* text-shadow: 4px 4px #cccccc; */
@@ -29,18 +24,6 @@
         #zone {
             /* font-size: 200px; */
             /* text-shadow: 4px 4px #cccccc; */
-        }
-
-        .error {
-            /* color: red; */
-            /* font-size: 100px !important; */
-        }
-
-        #buttons {
-            border: 1px solid #cccccc;
-            padding: 20px;
-            width: 400px;
-            margin: 0 auto;
         }
 
         #increment {
@@ -68,12 +51,6 @@
 
         a {
             color: #1456cb;
-        }
-
-        .diagram {
-            display: block;
-            margin: 30px auto;
-            text-align: center;
         }
 
         .button {
@@ -110,10 +87,6 @@
 
         #status:empty {
             display: none !important;
-        }
-
-        .content {
-            position: relative;
         }
 
         .inner {
@@ -291,7 +264,7 @@
 
     <div class="columns">
         <div class="info">
-            <h1 class="type-xxxl">Kuma Counter Demo <span id="version"></span></h1>
+            <h1 class="type-xxxl">Kuma Counter Demo <span id="ui-version"></span></h1>
             <p class="type-xl">
                 Welcome to a simple demo application to demonstrate how the Kuma service mesh works. This application
                 allows us
@@ -343,6 +316,13 @@
                         <span id="zone"></span>
                     </p>
                 </div>
+
+                <div class="tile">
+                    <h3>Version</h3>
+                    <p>
+                        <span id="version"></span>
+                    </p>
+                </div>
                 <div>
                     kv errors: <span id="kv-error-count">0</span>
                 </div>
@@ -378,22 +358,51 @@
     const $autoincrement = $("#autoincrement");
     const $increment = $("#increment");
     const $reset = $("#reset");
-    const $header = $("#header");
+    const $uiVersion = $("#ui-version");
     const $version = $("#version");
     const $loading = $("#loading");
     const $content = $("#content");
 
-    const handleError = (data) => {
-        if (data.type && data.type.startsWith("https://github.com/kumahq/kuma-counter-demo/blob/main/ERRORS.md#KV-")) {
-            $status.text(`KV Error:\n${JSON.stringify(data, null, 2)}`);
-            $kvErrors.text(parseInt($kvErrors.text()) + 1);
-            $counter.text("-");
-            $zone.text("-");
-        } else {
-            $status.text(`Error:\n${JSON.stringify(data, null, 2)}`);
-            $appErrors.text(parseInt($appErrors.text()) + 1);
-        }
-        $status.addClass("error");
+    const versionColors = {
+        v1: "#808080", // Default Gray
+        v2: "#5DA36F", // Greenish
+        v3: "#FF8C00", // Orange
+        v4: "#0088FF", // Bright Blue
+        v5: "#FF00FF", // Magenta
+        v6: "#00FF88", // Bright Aqua
+        v7: "#FFD700", // Yellow
+        v8: "#8A2BE2", // Purple
+        v9: "#A52A2A", // Brown
+        v10: "#2F4F4F", // Dark Slate Gray
+        default: "#CCCCCC" // Medium Gray
+    };
+
+    const handleError = (response) => {
+        let version = response.headers.get("x-demo-app-version");
+        $version.css("color", versionColors[version] || versionColors.default);
+        $version.text(version);
+        response.json().then(data => {
+            if (data.type && data.type.startsWith("https://github.com/kumahq/kuma-counter-demo/blob/main/ERRORS.md#KV-")) {
+                $status.text(`KV Error:\n${JSON.stringify(data, null, 2)}`);
+                $kvErrors.text(parseInt($kvErrors.text()) + 1);
+                $counter.text("-");
+                $zone.text("-");
+            } else {
+                $status.text(`Error:\n${JSON.stringify(data, null, 2)}`);
+                $appErrors.text(parseInt($appErrors.text()) + 1);
+            }
+            $status.addClass("error");
+        });
+    }
+    const handleSuccess = async (response) => {
+        let version = response.headers.get("x-demo-app-version");
+        $version.css("color", versionColors[version] || versionColors.default);
+        $version.text(version);
+        response.json().then(data => {
+            $status.removeClass("error");
+            $counter.text(data?.counter || "0");
+            $zone.text(data?.zone || "unknown");
+        });
     }
 
     const increment = () => {
@@ -402,16 +411,11 @@
         }
         running = true;
         fetch('/api/counter', {method: "POST"}).then((response) => {
-            return response.json().then(data => {
-                if (!response.ok) {
-                    handleError(data);
-                    return;
-                }
-                $status.removeClass("error");
-                $status.text("Everything is working");
-                $counter.text(data.counter);
-                $zone.text(data.zone || "unknown");
-            });
+            if (!response.ok) {
+                handleError(response);
+                return;
+            }
+            handleSuccess(response);
         }).catch((error) => {
             $status.addClass("error");
             $status.text(`core error:${JSON.stringify(error)}`);
@@ -423,21 +427,19 @@
             const response = await fetch('/api/version');
             const data = await response.json();
             if (!response.ok) {
-                handleError(data);
+                await handleError(response);
                 return;
             }
-            $header.css("background-color", data.color);
-            $version.text(data.version);
+            $uiVersion.css("color", versionColors[data.version] || versionColors.default);
+            $uiVersion.text(`version: "${data.version || "N/A"}"`);
         })(),
         (async () => {
             const response = await fetch('/api/counter');
-            const data = await response.json();
             if (!response.ok) {
-                handleError(data);
+                handleError(response);
                 return;
             }
-            $counter.text(data?.counter || "0");
-            $zone.text(data?.zone || "unknown");
+            handleSuccess(response);
         })()
     ]).then(() => {
         $loading.addClass("hide");
@@ -466,16 +468,12 @@
         }
         running = true;
 
-        fetch('/api/counter', {method: 'DELETE'}).then(async response => {
-            const data = await response.json();
+        fetch('/api/counter', {method: 'DELETE'}).then(response => {
             if (!response.ok) {
-                handleError(data);
+                handleError(response);
                 return;
             }
-            $status.removeClass("error");
-            $status.text("Everything is working")
-            $counter.text(data.counter);
-            $zone.text(data.zone || "unknown");
+            handleSuccess(response);
         }).catch((error) => {
             $status.addClass("error");
             $status.text("core error:" + error);

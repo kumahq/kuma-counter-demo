@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"github.com/getkin/kin-openapi/openapi3"
+	"github.com/go-logr/logr"
 	"github.com/kumahq/kuma-counter-demo/app/internal/base"
 	"github.com/kumahq/kuma-counter-demo/app/public"
 	"github.com/kumahq/kuma-counter-demo/pkg/api"
@@ -12,13 +13,11 @@ import (
 	"go.opentelemetry.io/contrib/instrumentation/github.com/gorilla/mux/otelmux"
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 	"go.opentelemetry.io/otel"
-	"go.opentelemetry.io/otel/exporters/otlp/otlplog/otlploghttp"
 	"go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetrichttp"
 	"go.opentelemetry.io/otel/exporters/otlp/otlptrace"
 	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp"
 	"go.opentelemetry.io/otel/exporters/prometheus"
 	"go.opentelemetry.io/otel/propagation"
-	"go.opentelemetry.io/otel/sdk/log"
 	"go.opentelemetry.io/otel/sdk/metric"
 	"go.opentelemetry.io/otel/sdk/trace"
 	"log/slog"
@@ -33,8 +32,7 @@ import (
 )
 
 var (
-	version    = "1.0"
-	color      = "#efefef"
+	version    = ""
 	kvUrl      = ""
 	appAddress = ""
 	appPort    = "5050"
@@ -61,17 +59,19 @@ func setupOTelSDK(ctx context.Context) (shutdown func(context.Context) error, er
 	handleErr := func(inErr error) {
 		err = errors.Join(inErr, shutdown(ctx))
 	}
-
+	otel.SetLogger(logr.FromSlogHandler(slog.Default().Handler()))
 	// Set up propagator.
-	prop := newPropagator()
-	otel.SetTextMapPropagator(prop)
+	otel.SetTextMapPropagator(propagation.NewCompositeTextMapPropagator(
+		propagation.TraceContext{},
+		propagation.Baggage{},
+	))
 
-	// Set up trace provider.
 	tracerProvider, err := newTraceProvider(ctx)
 	if err != nil {
 		handleErr(err)
 		return
 	}
+
 	shutdownFuncs = append(shutdownFuncs, tracerProvider.Shutdown)
 	otel.SetTracerProvider(tracerProvider)
 
@@ -84,28 +84,11 @@ func setupOTelSDK(ctx context.Context) (shutdown func(context.Context) error, er
 	shutdownFuncs = append(shutdownFuncs, meterProvider.Shutdown)
 	otel.SetMeterProvider(meterProvider)
 
-	// Set up logger provider.
-	//loggerProvider, err := newLoggerProvider(ctx)
-	//if err != nil {
-	//	handleErr(err)
-	//	return
-	//}
-	//slog.SetDefault(otelslog.NewLogger("base"))
-	//shutdownFuncs = append(shutdownFuncs, loggerProvider.Shutdown)
-	//global.SetLoggerProvider(loggerProvider)
-	slog.SetDefault(slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{AddSource: true})))
-
 	return
 }
 
-func newPropagator() propagation.TextMapPropagator {
-	return propagation.NewCompositeTextMapPropagator(
-		propagation.TraceContext{},
-		propagation.Baggage{},
-	)
-}
-
 func newTraceProvider(ctx context.Context) (*trace.TracerProvider, error) {
+	// Set up trace provider.
 	traceClient := otlptracehttp.NewClient(otlptracehttp.WithInsecure(), otlptracehttp.WithCompression(otlptracehttp.NoCompression))
 
 	traceExporter, err := otlptrace.New(ctx, traceClient)
@@ -136,19 +119,6 @@ func newMeterProvider(ctx context.Context) (*metric.MeterProvider, error) {
 	return meterProvider, nil
 }
 
-// nolint:unused
-func newLoggerProvider(ctx context.Context) (*log.LoggerProvider, error) { //
-	otlpExporter, err := otlploghttp.New(ctx, otlploghttp.WithInsecure(), otlploghttp.WithCompression(otlploghttp.NoCompression))
-	if err != nil {
-		return nil, err
-	}
-
-	loggerProvider := log.NewLoggerProvider(
-		log.WithProcessor(log.NewBatchProcessor(otlpExporter)),
-	)
-	return loggerProvider, nil
-}
-
 // Middleware to introduce delay based on the header value
 func delayMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -162,11 +132,9 @@ func delayMiddleware(next http.Handler) http.Handler {
 	})
 }
 func main() {
+	slog.SetDefault(slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{AddSource: true})))
 	if v := os.Getenv("APP_VERSION"); v != "" {
 		version = v
-	}
-	if c := os.Getenv("APP_COLOR"); c != "" {
-		color = c
 	}
 	if c := os.Getenv("ADDRESS"); c != "" {
 		appAddress = c
@@ -213,7 +181,7 @@ func run() (err error) {
 	http.DefaultClient = &http.Client{Transport: otelhttp.NewTransport(http.DefaultTransport)}
 
 	// Create an instance of our handler which satisfies the generated interface
-	apiHandler := base.NewServerImpl(slog.Default(), kvUrl, version, color)
+	apiHandler := base.NewServerImpl(slog.Default(), kvUrl, version)
 
 	apiRouter := r.PathPrefix("/api").Subrouter()
 	apiRouter.Use(otelmux.Middleware("api-server"))
@@ -241,7 +209,7 @@ func run() (err error) {
 	go func() {
 		srvErr <- srv.ListenAndServe()
 	}()
-	slog.Info("Server running", "addr", addr)
+	slog.Info("server running", "addr", addr)
 	select {
 	case err = <-srvErr:
 		return

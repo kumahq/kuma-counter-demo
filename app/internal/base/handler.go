@@ -11,40 +11,31 @@ import (
 	"sync"
 )
 
-func Error(w http.ResponseWriter, r *http.Request, statusCode int, errorType api.ErrorType, err error, format string, args ...any) {
-	s := errorType.QualifiedType()
-	span := trace.SpanFromContext(r.Context())
-	writeResponse(w, r, statusCode, api.Error{Type: &s, Status: statusCode, Instance: span.SpanContext().TraceID().String(), Title: fmt.Sprintf(format, args...)}, err)
-}
-
 type ServerImpl struct {
 	logger  *slog.Logger
 	kvUrl   string
 	kv      map[string]api.KV
-	color   string
 	version string
 	sync.Mutex
 }
 
-func NewServerImpl(logger *slog.Logger, kvUrl string, version string, color string) api.ServerInterface {
+func NewServerImpl(logger *slog.Logger, kvUrl string, version string) api.ServerInterface {
+	logger.Info("starting handler with", "kv-url", kvUrl, "version", version)
 	return &ServerImpl{
 		logger:  logger,
 		kv:      map[string]api.KV{},
 		kvUrl:   kvUrl,
 		version: version,
-		color:   color,
 	}
 
 }
 
 func (s *ServerImpl) GetVersion(w http.ResponseWriter, r *http.Request) {
-	writeResponse(w, r, http.StatusOK, api.VersionResponse{
-		Version: s.version,
-		Color:   s.color,
-	}, nil)
+	res := api.VersionResponse{Version: s.version}
+	s.writeResponse(w, r, http.StatusOK, res, nil)
 }
 
-func writeResponse(w http.ResponseWriter, r *http.Request, originalStatusCode int, response interface{}, err error) {
+func (s *ServerImpl) writeResponse(w http.ResponseWriter, r *http.Request, originalStatusCode int, response interface{}, err error) {
 	statusCode := originalStatusCode
 	if originalStatusCode/100 < 5 { // If the original status is 5xx ignore our override
 		statusStr := r.Header.Get("x-set-response-status-code")
@@ -52,6 +43,8 @@ func writeResponse(w http.ResponseWriter, r *http.Request, originalStatusCode in
 			originalStatusCode = st
 		}
 	}
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	w.Header().Set("X-Demo-App-Version", s.version)
 	w.WriteHeader(originalStatusCode)
 	if err != nil {
 		slog.ErrorContext(r.Context(), "failed request with error", "err", err, "status", statusCode, "response", response)
@@ -62,4 +55,10 @@ func writeResponse(w http.ResponseWriter, r *http.Request, originalStatusCode in
 	if err != nil {
 		fmt.Printf("failed to write response: %v\n", err)
 	}
+}
+
+func (s *ServerImpl) writeErrorResponse(w http.ResponseWriter, r *http.Request, statusCode int, errorType api.ErrorType, err error, format string, args ...any) {
+	qType := errorType.QualifiedType()
+	span := trace.SpanFromContext(r.Context())
+	s.writeResponse(w, r, statusCode, api.Error{Type: &qType, Status: statusCode, Instance: span.SpanContext().TraceID().String(), Title: fmt.Sprintf(format, args...)}, err)
 }

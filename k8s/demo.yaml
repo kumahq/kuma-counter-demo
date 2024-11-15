@@ -51,26 +51,31 @@ kind: Deployment
 metadata:
   name: demo-app
   namespace: kuma-demo
+  labels:
+    app: demo-app
+    version: v1
 spec:
   selector:
     matchLabels:
       app: demo-app
+      version: v1
   replicas: 1
   template:
     metadata:
       labels:
         app: demo-app
+        version: v1
     spec:
       containers:
         - name: app
           image: ghcr.io/kumahq/kuma-counter-demo:latest
           env:
             - name: KV_URL
-              value: "kv.kuma-demo.svc.cluster.local:5050"
+              value: "http://kv.kuma-demo.svc.cluster.local:5050"
             - name: APP_VERSION
-              value: "1.0"
-            - name: APP_COLOR
-              value: "#efefef"
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.labels['version']
           ports:
             - name: http
               containerPort: 5050
@@ -80,10 +85,14 @@ kind: Deployment
 metadata:
   name: demo-app-v2
   namespace: kuma-demo
+  labels:
+    app: demo-app
+    version: v2
 spec:
   selector:
     matchLabels:
       app: demo-app
+      version: v2
   replicas: 0
   template:
     metadata:
@@ -96,11 +105,11 @@ spec:
           image: ghcr.io/kumahq/kuma-counter-demo:latest
           env:
             - name: KV_URL
-              value: "kv.kuma-demo.svc.cluster.local:5050"
+              value: "http://kv.kuma-demo.svc.cluster.local:5050"
             - name: APP_VERSION
-              value: "2.0"
-            - name: APP_COLOR
-              value: "#5da36f"
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.labels['version']
           ports:
             - name: http
               containerPort: 5050
@@ -118,3 +127,33 @@ spec:
     appProtocol: http
     port: 5050
     targetPort: 5050
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: demo-app-v1
+  namespace: kuma-demo
+spec:
+  selector:
+    app: demo-app
+    version: v1
+  ports:
+    - protocol: TCP
+      appProtocol: http
+      port: 5050
+      targetPort: 5050
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: demo-app-v2
+  namespace: kuma-demo
+spec:
+  selector:
+    app: demo-app
+    version: v2
+  ports:
+    - protocol: TCP
+      appProtocol: http
+      port: 5050
+      targetPort: 5050
