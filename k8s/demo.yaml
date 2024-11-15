@@ -24,6 +24,8 @@ spec:
         - name: app
           image: ghcr.io/kumahq/kuma-counter-demo:latest
           env:
+            - name: OTEL_EXPORTER_OTLP_ENDPOINT
+              value: http://opentelemetry-collector.mesh-observability:4317
             - name: APP_VERSION
               valueFrom:
                 fieldRef:
@@ -70,6 +72,8 @@ spec:
         - name: app
           image: ghcr.io/kumahq/kuma-counter-demo:latest
           env:
+            - name: OTEL_EXPORTER_OTLP_ENDPOINT
+              value: http://opentelemetry-collector.mesh-observability:4317
             - name: KV_URL
               value: "http://kv.kuma-demo.svc.cluster.local:5050"
             - name: APP_VERSION
@@ -104,6 +108,8 @@ spec:
         - name: demo-app
           image: ghcr.io/kumahq/kuma-counter-demo:latest
           env:
+            - name: OTEL_EXPORTER_OTLP_ENDPOINT
+              value: http://opentelemetry-collector.mesh-observability:4317
             - name: KV_URL
               value: "http://kv.kuma-demo.svc.cluster.local:5050"
             - name: APP_VERSION
