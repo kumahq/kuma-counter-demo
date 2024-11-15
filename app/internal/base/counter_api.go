@@ -148,6 +148,7 @@ func (s *ServerImpl) tryIncrementCounter(w http.ResponseWriter, r *http.Request,
 		s.writeErrorResponse(w, r, http.StatusInternalServerError, api.INTERNAL_ERROR, err, "failed sending request")
 		return true
 	}
+	defer res.Body.Close()
 	switch res.StatusCode {
 	case http.StatusOK:
 		counterResponse := api.KVPostResponse{}

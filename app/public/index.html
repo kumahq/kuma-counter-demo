@@ -349,20 +349,22 @@
                 $appErrors.text(parseInt($appErrors.text()) + 1);
             }
         }).finally(() => {
-            $status.addClass("error");
             $counter.text("-");
             $zone.text("-");
+            $status.addClass("error");
             $status.text(statusText);
         });
     }
-    const handleSuccess = async (response) => {
-        let version = response.headers.get("x-demo-app-version");
-        $version.css("color", versionColors[version] || versionColors.default);
-        $version.text(version || "N/A");
+    const handleSuccess = (response) => {
         response.json().then(data => {
-            $status.removeClass("error");
             $counter.text(data?.counter || "0");
             $zone.text(data?.zone || "unknown");
+        }).finally(() => {
+            let version = response.headers.get("x-demo-app-version");
+            $version.css("color", versionColors[version] || versionColors.default);
+            $version.text(version || "N/A");
+            $status.removeClass("error");
+            $status.text("");
         });
     }
 
