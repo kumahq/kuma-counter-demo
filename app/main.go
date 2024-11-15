@@ -14,9 +14,8 @@ import (
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 	"go.opentelemetry.io/contrib/propagators/b3"
 	"go.opentelemetry.io/otel"
-	"go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetrichttp"
 	"go.opentelemetry.io/otel/exporters/otlp/otlptrace"
-	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp"
+	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
 	"go.opentelemetry.io/otel/exporters/prometheus"
 	"go.opentelemetry.io/otel/propagation"
 	"go.opentelemetry.io/otel/sdk/metric"
@@ -91,7 +90,7 @@ func setupOTelSDK(ctx context.Context) (shutdown func(context.Context) error, er
 
 func newTraceProvider(ctx context.Context) (*trace.TracerProvider, error) {
 	// Set up trace provider.
-	traceClient := otlptracehttp.NewClient(otlptracehttp.WithInsecure(), otlptracehttp.WithCompression(otlptracehttp.NoCompression))
+	traceClient := otlptracegrpc.NewClient(otlptracegrpc.WithInsecure())
 
 	traceExporter, err := otlptrace.New(ctx, traceClient)
 	if err != nil {
@@ -109,14 +108,14 @@ func newMeterProvider(ctx context.Context) (*metric.MeterProvider, error) {
 	if err != nil {
 		return nil, err
 	}
-	otlpExporter, err := otlpmetrichttp.New(ctx, otlpmetrichttp.WithInsecure(), otlpmetrichttp.WithCompression(otlpmetrichttp.NoCompression))
-	if err != nil {
-		return nil, err
-	}
+	//otlpExporter, err := otlpmetrichttp.New(ctx, otlpmetrichttp.WithInsecure(), otlpmetrichttp.WithCompression(otlpmetrichttp.NoCompression))
+	//if err != nil {
+	//	return nil, err
+	//}
 
 	meterProvider := metric.NewMeterProvider(
 		metric.WithReader(prometheusExporter),
-		metric.WithReader(metric.NewPeriodicReader(otlpExporter)),
+		//metric.WithReader(metric.NewPeriodicReader(otlpExporter)),
 	)
 	return meterProvider, nil
 }
