@@ -72,7 +72,6 @@ func setupOTelSDK(ctx context.Context) (shutdown func(context.Context) error, er
 		handleErr(err)
 		return
 	}
-
 	shutdownFuncs = append(shutdownFuncs, tracerProvider.Shutdown)
 	otel.SetTracerProvider(tracerProvider)
 
