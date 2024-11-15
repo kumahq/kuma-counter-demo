@@ -380,24 +380,34 @@
     const handleError = (response) => {
         let version = response.headers.get("x-demo-app-version");
         $version.css("color", versionColors[version] || versionColors.default);
-        $version.text(version);
-        response.json().then(data => {
-            if (data.type && data.type.startsWith("https://github.com/kumahq/kuma-counter-demo/blob/main/ERRORS.md#KV-")) {
-                $status.text(`KV Error:\n${JSON.stringify(data, null, 2)}`);
-                $kvErrors.text(parseInt($kvErrors.text()) + 1);
-                $counter.text("-");
-                $zone.text("-");
-            } else {
-                $status.text(`Error:\n${JSON.stringify(data, null, 2)}`);
+        $version.text(version || "N/A");
+        let statusText = `statusCode: ${response.status}\n\n`;
+        response.text().then(text => {
+            try {
+                let data = JSON.parse(text);
+                if (data.type && data.type.startsWith("https://github.com/kumahq/kuma-counter-demo/blob/main/ERRORS.md#KV-")) {
+                    statusText += `KV Error:\n${JSON.stringify(data, null, 2)}`;
+                    $kvErrors.text(parseInt($kvErrors.text()) + 1);
+                } else {
+                    statusText += `Error:\n${JSON.stringify(data, null, 2)}`;
+                    $appErrors.text(parseInt($appErrors.text()) + 1);
+                }
+            } catch (e) {
+                console.error(e);
+                statusText += `Response is not JSON got:\n${text}`;
                 $appErrors.text(parseInt($appErrors.text()) + 1);
             }
+        }).finally(() => {
             $status.addClass("error");
+            $counter.text("-");
+            $zone.text("-");
+            $status.text(statusText);
         });
     }
     const handleSuccess = async (response) => {
         let version = response.headers.get("x-demo-app-version");
         $version.css("color", versionColors[version] || versionColors.default);
-        $version.text(version);
+        $version.text(version || "N/A");
         response.json().then(data => {
             $status.removeClass("error");
             $counter.text(data?.counter || "0");
@@ -425,11 +435,11 @@
     Promise.all([
         (async () => {
             const response = await fetch('/api/version');
-            const data = await response.json();
             if (!response.ok) {
-                await handleError(response);
+                handleError(response);
                 return;
             }
+            const data = await response.json();
             $uiVersion.css("color", versionColors[data.version] || versionColors.default);
             $uiVersion.text(`version: "${data.version || "N/A"}"`);
         })(),

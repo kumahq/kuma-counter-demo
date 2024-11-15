@@ -58,6 +58,12 @@ The `APP_VERSION` environment variables are handy when we want to create differe
 In the [`k8s`](/k8s) folder you can access a simple manifests to run the workloads using: `kubectl apply -f k8s/demo-app.yaml`.
 There are then extra examples to play with Kuma.
 
+To debug things we strongly recommend using: [`netshoot`](https://github.com/nicolaka/netshoot):
+
+```shell
+kubectl debug  demo-app-68784dc9d7-rjxgx -n kuma-demo -it --image=nicolaka/netshoot
+```
+
 ## Modifying responses
 
 ### Adding delay to response

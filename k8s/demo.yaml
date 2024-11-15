@@ -25,9 +25,9 @@ spec:
           image: ghcr.io/kumahq/kuma-counter-demo:latest
           env:
             - name: APP_VERSION
-              value: "1.0"
-            - name: APP_COLOR
-              value: "#efefef"
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.labels['version']
           ports:
             - name: http
               containerPort: 5050
