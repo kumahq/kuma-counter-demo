@@ -6,10 +6,15 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/kumahq/kuma-counter-demo/pkg/api"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/trace"
 	"io"
+	"math/rand"
 	"net/http"
 	"net/url"
 	"strconv"
+	"time"
 )
 
 // This API uses 2 entry in the KV COUNTER and ZONE
@@ -110,17 +115,19 @@ func (s *ServerImpl) PostCounter(w http.ResponseWriter, r *http.Request) {
 		s.writeErrorResponse(w, r, http.StatusInternalServerError, api.INTERNAL_ERROR, err, "failed to retrieve zone")
 		return
 	}
+	ctx, span := otel.Tracer("").Start(r.Context(), "POST-KV")
 	for i := 0; i < 5; i++ {
-		if s.tryIncrementCounter(w, r, zone) {
+		span.AddEvent("try", trace.WithAttributes(attribute.Int("try-count", i)))
+		if s.tryIncrementCounter(ctx, w, r, zone) {
 			return
 		}
+		time.Sleep(time.Duration(int64(rand.Intn(50)+50)) * time.Millisecond)
 	}
 	s.writeErrorResponse(w, r, http.StatusConflict, api.KV_CONFLICT, nil, "out of retries without success")
 
 }
 
-func (s *ServerImpl) tryIncrementCounter(w http.ResponseWriter, r *http.Request, zone string) bool {
-	ctx := r.Context()
+func (s *ServerImpl) tryIncrementCounter(ctx context.Context, w http.ResponseWriter, r *http.Request, zone string) bool {
 	counter, err := s.getKey(ctx, COUNTER_KEY)
 	if err != nil {
 		s.logger.InfoContext(ctx, "failed to retrieve counter", "error", err)
@@ -143,11 +150,6 @@ func (s *ServerImpl) tryIncrementCounter(w http.ResponseWriter, r *http.Request,
 		return true
 	}
 	switch res.StatusCode {
-	case http.StatusConflict:
-		return false
-	case http.StatusNotFound:
-		s.writeErrorResponse(w, r, res.StatusCode, api.KV_NOT_FOUND, nil, "counter key not found")
-		return true
 	case http.StatusOK:
 		counterResponse := api.KVPostResponse{}
 		err = json.NewDecoder(res.Body).Decode(&counterResponse)
@@ -161,6 +163,11 @@ func (s *ServerImpl) tryIncrementCounter(w http.ResponseWriter, r *http.Request,
 			Zone:    zone,
 		}
 		s.writeResponse(w, r, http.StatusOK, response, nil)
+		return true
+	case http.StatusConflict:
+		return false
+	case http.StatusNotFound:
+		s.writeErrorResponse(w, r, res.StatusCode, api.KV_NOT_FOUND, nil, "counter key not found")
 		return true
 	default:
 		s.writeErrorResponse(w, r, res.StatusCode, api.INTERNAL_ERROR, nil, "failed sending request")
