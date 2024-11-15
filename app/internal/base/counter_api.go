@@ -4,7 +4,9 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"fmt"
 	"github.com/kumahq/kuma-counter-demo/pkg/api"
+	"io"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -57,6 +59,10 @@ func (s *ServerImpl) getKey(ctx context.Context, key string) (string, error) {
 	defer res.Body.Close()
 	if res.StatusCode == http.StatusNotFound {
 		return "", nil
+	}
+	if res.StatusCode != http.StatusOK {
+		b, _ := io.ReadAll(res.Body)
+		return "", fmt.Errorf("request to kv failed with statusCode: %q body: %q", res.Status, b)
 	}
 	zoneResponse := api.KVGetResponse{}
 	err = json.NewDecoder(res.Body).Decode(&zoneResponse)
