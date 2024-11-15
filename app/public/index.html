@@ -79,6 +79,7 @@
             background: #82d9a6;
             font-size: 20px;
             font-weight: bold;
+            overflow: auto;
         }
 
         #status.error {
@@ -89,16 +90,10 @@
             display: none !important;
         }
 
-        .inner {
-            max-width: 1300px;
-            margin-left: auto;
-            margin-right: auto;
-        }
-
         .columns {
             display: flex;
             max-width: 1300px;
-            margin: 20px auto;
+            margin: 0 auto;
             text-align: left;
         }
 
@@ -107,23 +102,12 @@
             flex-basis: 50%;
             padding: 50px;
         }
-
-        /* make sure to place your content above the pseudo element! */
-        .info > * {
-            position: relative;
-            z-index: 1;
+        .info {
+            background-color: rgba(0, 0, 0, 0.025);
         }
 
-        /* hacky background 50% column trick */
-        .info::after {
-            position: absolute;
-            top: 0;
-            left: 0;
-            display: block;
-            content: "";
-            width: 50vw;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.025);
+        .info .mermaid {
+            padding: 36px 0;
         }
 
         button:disabled {
@@ -211,29 +195,6 @@
             margin-right: 10px;
         }
 
-        footer {
-            background: #fff;
-            border-top: 1px solid #eee;
-        }
-
-        @media (min-height: 775px) {
-            footer {
-                position: absolute;
-                bottom: 0;
-                left: 0;
-                width: 100%;
-            }
-        }
-
-        footer > .inner {
-            text-align: center;
-            padding: 30px;
-        }
-
-        footer p {
-            margin: 0 0 10px 0;
-        }
-
         .type-s {
             font-size: 14px !important;
         }
@@ -274,7 +235,6 @@
                 <li><strong>demo-app:</strong> To serve the backend API and this frontend</li>
                 <li><strong>kv:</strong> To store the counter value</li>
             </ul>
-            <p>
             <pre class="mermaid">
                 flowchart LR
 
@@ -282,6 +242,11 @@
                 kv(kv :5050)
                 demo-app --> kv
             </pre>
+            <p>
+            <a href="https://github.com/kumahq/kuma-counter-demo" class="icon-button" target="_blank">
+                <img src="./github.svg" alt="GitHub logo" class="icon">
+                <span>https://github.com/kumahq/kuma-counter-demo</span>
+            </a>
             </p>
         </div>
         <div class="controls-container">
@@ -301,7 +266,7 @@
             </div>
 
             <div class="output">
-                <div id="status"></div>
+                <pre id="status"></pre>
 
                 <div class="tile">
                     <h3>Counter</h3>
@@ -333,20 +298,6 @@
             </div>
         </div>
     </div>
-
-    <footer>
-        <div class="inner">
-            <p>
-                You can find the source code for this demo at
-            </p>
-            <p>
-                <a href="https://github.com/kumahq/kuma-counter-demo" class="icon-button" target="_blank">
-                    <img src="./github.svg" alt="GitHub logo" class="icon">
-                    <span>https://github.com/kumahq/kuma-counter-demo</span>
-                </a>
-            </p>
-        </div>
-    </footer>
 </div>
 <script type="text/javascript">
     let running = false;
