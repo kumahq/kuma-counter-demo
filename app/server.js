@@ -10,7 +10,7 @@ const PORT = 5000;
 const app = express();
 
 const version = process.env.APP_VERSION || "1.0";
-const color = process.env.APP_COLOR || "#efefef";
+const color = process.env.APP_COLOR || "#FAFAFA";
 
 function getClient() {
   const host = process.env.REDIS_HOST || "127.0.0.1";
