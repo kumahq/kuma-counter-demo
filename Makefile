@@ -15,7 +15,11 @@ GOLANGCI_LINT_VERSION = $(shell yq -ojson -r '.golangci-lint' < $(TOOLS_VERSIONS
 GOLANGCI_LINT = $(PROJECT_DIR)/bin/installs/golangci-lint/$(GOLANGCI_LINT_VERSION)/bin/golangci-lint
 .PHONY: golangci-lint.download
 golangci-lint.download: | mise ## Download golangci-lint locally if necessary.
-	$(MISE) install -y -q golangci-lint@$(GOLANGCI_LINT_VERSION)
+	ls -lah $(PROJECT_DIR) || true
+	tree $(MISE_DATA_DIR) || true
+	$(MISE) install -y -v golangci-lint@$(GOLANGCI_LINT_VERSION)
+	ls -lah $(PROJECT_DIR) || true
+	tree $(MISE_DATA_DIR) || true
 
 GORELEASER_VERSION = $(shell yq -ojson -r '.goreleaser' < $(TOOLS_VERSIONS_FILE))
 GORELEASER = $(PROJECT_DIR)/bin/installs/goreleaser/$(GORELEASER_VERSION)/bin/goreleaser
