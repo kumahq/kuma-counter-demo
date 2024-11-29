@@ -10,16 +10,17 @@ const PORT = 5000;
 const app = express();
 
 const version = process.env.APP_VERSION || "1.0";
-const color = process.env.APP_COLOR || "#efefef";
+const color = process.env.APP_COLOR || "#FAFAFA";
 
 function getClient() {
   const host = process.env.REDIS_HOST || "127.0.0.1";
   const port = parseInt(process.env.REDIS_PORT) || 6379;
+  const ip_version = parseInt(process.env.IP_VERSION) || 4;
   console.log("Connecting to Redis at %s:%d", host, port);
   const client = new Redis({
     port: port,
     host: host,
-    family: 4,
+    family: ip_version,
     autoResendUnfulfilledCommands: false,
     autoResubscribe: false,
     enableOfflineQueue: true,

@@ -39,7 +39,8 @@ We can configure the following environment variables when running `demo-app`:
 * `REDIS_HOST`: Determines the hostname to use when connecting to Redis. Default is `127.0.0.1`.
 * `REDIS_PORT`: Determines the port to use when connecting to Redis. Default is `6379`.
 * `APP_VERSION`: Lets you change the version number displayed in the main page of `demo-app`. Default is `1.0`.
-* `APP_COLOR`: Lets you change background color of the `demo-app` main page. Default is `#efefef`.
+* `APP_COLOR`: Lets you change background color of the `demo-app` main page. Default is `#FAFAFA`.
+* `IP_VERSION`: Lets you change the IP family version to use when connecting to Redis. Default is `4` for IPv4, with the option to set as `6` for IPv6.
 
 The `APP_VERSION` and `APP_COLOR` environment variables are handy when we want to create different versions of `demo-app` and get immediate visual feedback when routing across them.
 
