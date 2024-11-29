@@ -18,7 +18,7 @@ jobs:
       - run: make clean
       - run: make generate
       - run: make check
-      - id: check for changes
+      - name: check for changes
         run: |
           if [[ -n $(git status --porcelain) ]]; then
             git status
