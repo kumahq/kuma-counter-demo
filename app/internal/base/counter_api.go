@@ -7,9 +7,11 @@ import (
 	"fmt"
 	"github.com/kumahq/kuma-counter-demo/pkg/api"
 	"io"
+	"math/rand"
 	"net/http"
 	"net/url"
 	"strconv"
+	"time"
 )
 
 // This API uses 2 entry in the KV COUNTER and ZONE
@@ -110,12 +112,16 @@ func (s *ServerImpl) PostCounter(w http.ResponseWriter, r *http.Request) {
 		s.writeErrorResponse(w, r, http.StatusInternalServerError, api.INTERNAL_ERROR, err, "failed to retrieve zone")
 		return
 	}
-	for i := 0; i < 5; i++ {
+	for i := 0; ; i++ {
 		if s.tryIncrementCounter(w, r, zone) {
 			return
 		}
+		if i == 5 {
+			s.writeErrorResponse(w, r, http.StatusConflict, api.KV_CONFLICT, nil, "out of retries without success")
+			return
+		}
+		time.Sleep(time.Duration(int64(rand.Intn(50)+50)) * time.Millisecond)
 	}
-	s.writeErrorResponse(w, r, http.StatusConflict, api.KV_CONFLICT, nil, "out of retries without success")
 
 }
 
@@ -142,12 +148,8 @@ func (s *ServerImpl) tryIncrementCounter(w http.ResponseWriter, r *http.Request,
 		s.writeErrorResponse(w, r, http.StatusInternalServerError, api.INTERNAL_ERROR, err, "failed sending request")
 		return true
 	}
+	defer res.Body.Close()
 	switch res.StatusCode {
-	case http.StatusConflict:
-		return false
-	case http.StatusNotFound:
-		s.writeErrorResponse(w, r, res.StatusCode, api.KV_NOT_FOUND, nil, "counter key not found")
-		return true
 	case http.StatusOK:
 		counterResponse := api.KVPostResponse{}
 		err = json.NewDecoder(res.Body).Decode(&counterResponse)
@@ -161,6 +163,11 @@ func (s *ServerImpl) tryIncrementCounter(w http.ResponseWriter, r *http.Request,
 			Zone:    zone,
 		}
 		s.writeResponse(w, r, http.StatusOK, response, nil)
+		return true
+	case http.StatusConflict:
+		return false
+	case http.StatusNotFound:
+		s.writeErrorResponse(w, r, res.StatusCode, api.KV_NOT_FOUND, nil, "counter key not found")
 		return true
 	default:
 		s.writeErrorResponse(w, r, res.StatusCode, api.INTERNAL_ERROR, nil, "failed sending request")
