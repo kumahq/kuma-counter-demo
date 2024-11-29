@@ -1,0 +1,33 @@
+---
+apiVersion: skaffold/v4beta11
+kind: Config
+metadata:
+  name: kuma-counter-demo
+build:
+  platforms: [linux/amd64, linux/arm64]
+  artifacts:
+  - image: ghcr.io/kumahq/kuma-counter-demo
+    ko:
+      main: ./app/
+manifests:
+  kustomize:
+    paths:
+    - ./kustomize/base
+deploy:
+  kubectl: {}
+  helm:
+    releases:
+    - name: kuma
+      remoteChart: kuma
+      repo: https://kumahq.github.io/charts
+      namespace: kuma-system
+      createNamespace: true
+      wait: true
+profiles:
+- name: dev
+  manifests:
+    kustomize:
+      paths:
+      - ./kustomize/overlays/002-with-gateway
+  activation:
+  - command: dev
