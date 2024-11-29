@@ -14,8 +14,18 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
-      - run: curl https://mise.run | sh
+      - uses: jdx/mise-action@v2
+      - run: make clean
+      - run: make generate
       - run: make check
+      - name: check for changes
+        run: |
+          if [[ -n $(git status --porcelain) ]]; then
+            git status
+            git diff
+            echo "Files have changed, failing CI"
+            exit 1
+          fi
       - run: make build
       - run: make test
       - uses: actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882 # v4.4.3

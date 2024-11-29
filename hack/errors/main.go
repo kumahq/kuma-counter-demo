@@ -2,13 +2,14 @@ package main
 
 import (
 	"fmt"
-	"github.com/kumahq/kuma-counter-demo/pkg/api"
 	"os"
+
+	"github.com/kumahq/kuma-counter-demo/pkg/api"
 )
 
-//go:generate go run errors.go
+//go:generate go run .
 func main() {
-	file, err := os.Create("../ERRORS.md")
+	file, err := os.Create("../../ERRORS.md")
 	if err != nil {
 		fmt.Println("Error creating file:", err)
 		return

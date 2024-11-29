@@ -9,11 +9,6 @@
 
 version: 2
 
-before:
-  hooks:
-    - make generate
-    - make check
-
 builds:
   - env:
       - CGO_ENABLED=0
@@ -36,6 +31,10 @@ archives:
       {{- else if eq .Arch "386" }}i386
       {{- else }}{{ .Arch }}{{ end }}
       {{- if .Arm }}v{{ .Arm }}{{ end }}
+    files:
+      - LICENSE
+      - README.md
+      - k8s
 
 changelog:
   sort: asc

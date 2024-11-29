@@ -1,0 +1,9 @@
+---
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - ../001-with-mtls
+  - mesh-gateway-instance.yaml
+  - mesh-gateway.yaml
+  - mesh-http-route.yaml
+  - mesh-traffic-permission.yaml

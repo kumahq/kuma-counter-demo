@@ -1,0 +1,5 @@
+# Can add files considered as auto generated
+# https://docs.github.com/en/repositories/working-with-files/managing-files/customizing-how-changed-files-appear-on-github
+k8s/* linguist-generated=true
+pkg/api/gen.go linguist-generated=true
+ERRORS.md linguist-generated=true

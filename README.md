@@ -44,6 +44,41 @@ You can set the zone key on the kv `curl -v -XPOST -d '{"value":"zone-1"}' local
 
 Follow the [getting-started](https://kuma.io/docs/latest/quickstart/kubernetes-demo/) on the Kuma docs.
 
+Or you can play with skaffold on your already running k8s cluster:
+
+```shell
+make skaffold/dev
+```
+This will demo an entire stack on top of Kuma.
+
+You can also just pick which demo you want with:
+
+```shell
+make demo/list
+```
+
+Which will return something like:
+
+```shell
+$ make demo/list
+# Run the demo application without Kuma
+kubectl apply -k kustomize/base
+# Run the demo application with Kuma
+kubectl apply -k kustomize/overlays/000-with-kuma
+# Run the demo application with Kuma, mTLS and Mesh Traffic Permission
+kubectl apply -k kustomize/overlays/001-with-mtls
+# Run the demo application with Kuma, mTLS, Mesh Traffic Permission and a Gateway
+kubectl apply -k kustomize/overlays/002-with-gateway
+```
+
+To apply these manifests directly you should have a running k8s cluster and Kuma already installed.
+
+```shell
+helm install kuma kuma/kuma --create-namespace --namespace kuma-system
+```
+
+You can cleanup a demo by doing: `kubectl delete -k k8s/overlays/002-with-gateway`
+
 ### Environment Variables
 
 We can configure the following environment variables when running `demo-app`:
@@ -53,10 +88,7 @@ We can configure the following environment variables when running `demo-app`:
 
 The `APP_VERSION` environment variables are handy when we want to create different versions of `demo-app` and get immediate visual feedback when routing across them.
 
-### K8s manifests
-
-In the [`k8s`](/k8s) folder you can access a simple manifests to run the workloads using: `kubectl apply -f k8s/demo-app.yaml`.
-There are then extra examples to play with Kuma.
+### Debugging
 
 To debug things we strongly recommend using: [`netshoot`](https://github.com/nicolaka/netshoot):
 
@@ -82,15 +114,5 @@ To enforce response status code you need to set header `x-set-response-status-co
 curl localhost:5050/api/counter -XPOST -H "x-set-response-status-code: 503"
 ```
 
-## Developing
-
-You'll only need [mise](https://mise.jdx.dev).
-
-```shell
-make clean
-make generate
-make test
-make build
-```
 [kuma-url]: https://kuma.io/
 [kuma-logo]: https://kuma-public-assets.s3.amazonaws.com/kuma-logo-v2.png
