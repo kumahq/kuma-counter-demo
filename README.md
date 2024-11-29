@@ -1,6 +1,6 @@
 # Kuma Counter Demo
 
-[![Run in Insomnia}](https://insomnia.rest/images/run.svg)](https://insomnia.rest/run/?label=Kuma-count-demo&uri=https%3A%2F%2Fgithub.com%2Fkumahq%2Fkuma-counter-demo%2Fblob%2Fmaster%2Fopenapi.yaml)
+[![Run in Insomnia}](https://insomnia.rest/images/run.svg)](https://insomnia.rest/run/?label=kuma-counter-demo&uri=https%3A%2F%2Fgithub.com%2Fkumahq%2Fkuma-counter-demo%2Fblob%2Fmain%2Fopenapi.yaml)
 
 [![][kuma-logo]][kuma-url]
 
