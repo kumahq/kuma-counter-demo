@@ -4,6 +4,7 @@ kind: MeshGateway
 mesh: default
 metadata:
   name: edge-gateway
+  namespace: kuma-demo
 spec:
   conf:
     listeners:
