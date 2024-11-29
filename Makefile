@@ -3,33 +3,17 @@ SHELL := bash
 .SHELLFLAGS := -eu -o pipefail -c
 
 PROJECT_DIR := $(shell dirname $(abspath $(lastword $(MAKEFILE_LIST))))
-TOOLS_VERSIONS_FILE = $(PROJECT_DIR)/.tools_versions.yaml
 
-export MISE_DATA_DIR = $(PROJECT_DIR)/bin/
-MISE := $(shell which mise)
-.PHONY: mise
-mise:
-	@mise -V >/dev/null || (echo "mise - https://github.com/jdx/mise - not found. Please install it." && exit 1)
+ifeq (,$(shell which mise))
+$(error "mise - https://github.com/jdx/mise - not found. Please install it.")
+endif
+MISE := $(shell which mise) -y
 
-GOLANGCI_LINT_VERSION = $(shell yq -ojson -r '.golangci-lint' < $(TOOLS_VERSIONS_FILE))
-GOLANGCI_LINT = $(PROJECT_DIR)/bin/installs/golangci-lint/$(GOLANGCI_LINT_VERSION)/bin/golangci-lint
-.PHONY: golangci-lint.download
-golangci-lint.download: | mise ## Download golangci-lint locally if necessary.
-	$(MISE) install -y -q golangci-lint@$(GOLANGCI_LINT_VERSION)
+GOLANGCI_LINT = $(MISE) x golangci-lint -- golangci-lint
+GORELEASER = $(MISE) x goreleaser -- goreleaser
+OAPI_CODEGEN = $(MISE) x oapi-codegen -- oapi-codegen
 
-GORELEASER_VERSION = $(shell yq -ojson -r '.goreleaser' < $(TOOLS_VERSIONS_FILE))
-GORELEASER = $(PROJECT_DIR)/bin/installs/goreleaser/$(GORELEASER_VERSION)/bin/goreleaser
-.PHONY: goreleaser.download
-goreleaser.download: | mise ## Download goreleaser locally if necessary.
-	$(MISE) install -y -q goreleaser@$(GORELEASER_VERSION)
-
-OAPI_CODEGEN_VERSION = $(shell yq -ojson -r '.oapi-codegen' < $(TOOLS_VERSIONS_FILE))
-OAPI_CODEGEN = $(PROJECT_DIR)/bin/installs/oapi-codegen/$(OAPI_CODEGEN_VERSION)/bin/oapi-codegen
-.PHONY: oapi-codegen.download
-oapi-codegen.download: | mise ## Download oapi-codegen locally if necessary.
-	$(MISE) install -y -q oapi-codegen@$(OAPI_CODEGEN_VERSION)
-
-pkg/api/gen.go: openapi-config.yaml openapi.yaml | oapi-codegen.download
+pkg/api/gen.go: openapi-config.yaml openapi.yaml
 	$(OAPI_CODEGEN) --config openapi-config.yaml openapi.yaml
 
 .PHONY: clean
@@ -56,10 +40,10 @@ tidy:
 	go mod tidy
 
 .PHONY: golangci-lint
-golangci-lint: | golangci-lint.download
+golangci-lint:
 	$(GOLANGCI_LINT) run --verbose --config .golangci.yaml $(GOLANGCI_LINT_FLAGS)
 
-build: | goreleaser.download
+build:
 	$(GORELEASER) release --snapshot --clean
 
 .PHONY: generate
