@@ -54,10 +54,22 @@ dockers:
     build_flag_templates:
       - "--label=org.opencontainers.image.source=https://github.com/kumahq/kuma-counter-demo"
       - "--label=org.opencontainers.image.created={{.Date}}"
+      - "--label=org.opencontainers.image.title={{.ProjectName}}"
+      - "--label=org.opencontainers.image.revision={{.FullCommit}}"
+      - "--label=org.opencontainers.image.version={{.Version}}"
+  - id: demo-app-debian-slim
+    image_templates:
+      - ghcr.io/kumahq/kuma-counter-demo:{{ .Tag }}-debian-slim
+      - ghcr.io/kumahq/kuma-counter-demo:{{ .Major }}-debian-slim
+      - ghcr.io/kumahq/kuma-counter-demo:debian-slim
+    dockerfile: ./app/Dockerfile
+    build_flag_templates:
+      - "--label=org.opencontainers.image.source=https://github.com/kumahq/kuma-counter-demo"
       - "--label=org.opencontainers.image.created={{.Date}}"
       - "--label=org.opencontainers.image.title={{.ProjectName}}"
       - "--label=org.opencontainers.image.revision={{.FullCommit}}"
       - "--label=org.opencontainers.image.version={{.Version}}"
+      - "--build-arg=BASE_IMAGE=debian:12.8-slim"
 
 release:
   draft: true
