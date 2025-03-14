@@ -46,6 +46,7 @@ changelog:
 dockers:
   - id: demo-app-amd64
     use: buildx
+    goarch: amd64
     image_templates:
       - ghcr.io/kumahq/kuma-counter-demo:{{ .Tag }}-amd64
       - ghcr.io/kumahq/kuma-counter-demo:{{ .Major }}-amd64
@@ -78,6 +79,7 @@ dockers:
 
   - id: demo-app-debian-slim-amd64
     use: buildx
+    goarch: amd64
     image_templates:
       - ghcr.io/kumahq/kuma-counter-demo:{{ .Tag }}-debian-slim-amd64
       - ghcr.io/kumahq/kuma-counter-demo:{{ .Major }}-debian-slim-amd64
