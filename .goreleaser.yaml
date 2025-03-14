@@ -44,31 +44,99 @@ changelog:
       - '^test:'
 
 dockers:
-  - id: demo-app
+  - id: demo-app-amd64
+    use: buildx
+    goarch: amd64
     image_templates:
-      - ghcr.io/kumahq/kuma-counter-demo:{{ .Tag }}
-      - ghcr.io/kumahq/kuma-counter-demo:{{ .Major }}
-      - ghcr.io/kumahq/kuma-counter-demo:latest
+      - ghcr.io/kumahq/kuma-counter-demo:{{ .Tag }}-amd64
+      - ghcr.io/kumahq/kuma-counter-demo:{{ .Major }}-amd64
+      - ghcr.io/kumahq/kuma-counter-demo:latest-amd64
     dockerfile: ./app/Dockerfile
     build_flag_templates:
+      - "--pull"
       - "--label=org.opencontainers.image.source=https://github.com/kumahq/kuma-counter-demo"
       - "--label=org.opencontainers.image.created={{.Date}}"
       - "--label=org.opencontainers.image.title={{.ProjectName}}"
       - "--label=org.opencontainers.image.revision={{.FullCommit}}"
       - "--label=org.opencontainers.image.version={{.Version}}"
-  - id: demo-app-debian-slim
+      - "--platform=linux/amd64"
+  - id: demo-app-arm64
+    use: buildx
+    goarch: arm64
     image_templates:
-      - ghcr.io/kumahq/kuma-counter-demo:{{ .Tag }}-debian-slim
-      - ghcr.io/kumahq/kuma-counter-demo:{{ .Major }}-debian-slim
-      - ghcr.io/kumahq/kuma-counter-demo:debian-slim
+      - ghcr.io/kumahq/kuma-counter-demo:{{ .Tag }}-arm64
+      - ghcr.io/kumahq/kuma-counter-demo:{{ .Major }}-arm64
+      - ghcr.io/kumahq/kuma-counter-demo:latest-arm64
     dockerfile: ./app/Dockerfile
     build_flag_templates:
+      - "--pull"
+      - "--label=org.opencontainers.image.source=https://github.com/kumahq/kuma-counter-demo"
+      - "--label=org.opencontainers.image.created={{.Date}}"
+      - "--label=org.opencontainers.image.title={{.ProjectName}}"
+      - "--label=org.opencontainers.image.revision={{.FullCommit}}"
+      - "--label=org.opencontainers.image.version={{.Version}}"
+      - "--platform=linux/arm64"
+
+  - id: demo-app-debian-slim-amd64
+    use: buildx
+    goarch: amd64
+    image_templates:
+      - ghcr.io/kumahq/kuma-counter-demo:{{ .Tag }}-debian-slim-amd64
+      - ghcr.io/kumahq/kuma-counter-demo:{{ .Major }}-debian-slim-amd64
+      - ghcr.io/kumahq/kuma-counter-demo:debian-slim-amd64
+    dockerfile: ./app/Dockerfile
+    build_flag_templates:
+      - "--pull"
       - "--label=org.opencontainers.image.source=https://github.com/kumahq/kuma-counter-demo"
       - "--label=org.opencontainers.image.created={{.Date}}"
       - "--label=org.opencontainers.image.title={{.ProjectName}}"
       - "--label=org.opencontainers.image.revision={{.FullCommit}}"
       - "--label=org.opencontainers.image.version={{.Version}}"
       - "--build-arg=BASE_IMAGE=debian:12.8-slim"
+      - "--platform=linux/amd64"
+  - id: demo-app-debian-slim-arm64
+    use: buildx
+    goarch: arm64
+    image_templates:
+      - ghcr.io/kumahq/kuma-counter-demo:{{ .Tag }}-debian-slim-arm64
+      - ghcr.io/kumahq/kuma-counter-demo:{{ .Major }}-debian-slim-arm64
+      - ghcr.io/kumahq/kuma-counter-demo:debian-slim-arm64
+    dockerfile: ./app/Dockerfile
+    build_flag_templates:
+      - "--pull"
+      - "--label=org.opencontainers.image.source=https://github.com/kumahq/kuma-counter-demo"
+      - "--label=org.opencontainers.image.created={{.Date}}"
+      - "--label=org.opencontainers.image.title={{.ProjectName}}"
+      - "--label=org.opencontainers.image.revision={{.FullCommit}}"
+      - "--label=org.opencontainers.image.version={{.Version}}"
+      - "--build-arg=BASE_IMAGE=debian:12.8-slim"
+      - "--platform=linux/arm64"
+
+docker_manifests:
+  - name_template: "ghcr.io/kumahq/kuma-counter-demo:{{ .Tag }}"
+    image_templates:
+      - ghcr.io/kumahq/kuma-counter-demo:{{ .Tag }}-amd64
+      - ghcr.io/kumahq/kuma-counter-demo:{{ .Tag }}-arm64
+  - name_template: "ghcr.io/kumahq/kuma-counter-demo:{{ .Major }}"
+    image_templates:
+      - ghcr.io/kumahq/kuma-counter-demo:{{ .Major }}-amd64
+      - ghcr.io/kumahq/kuma-counter-demo:{{ .Major }}-arm64
+  - name_template: "ghcr.io/kumahq/kuma-counter-demo:latest"
+    image_templates:
+      - ghcr.io/kumahq/kuma-counter-demo:latest-amd64
+      - ghcr.io/kumahq/kuma-counter-demo:latest-arm64
+  - name_template: "ghcr.io/kumahq/kuma-counter-demo:{{ .Tag }}-debian-slim"
+    image_templates:
+      - ghcr.io/kumahq/kuma-counter-demo:{{ .Tag }}-debian-slim-amd64
+      - ghcr.io/kumahq/kuma-counter-demo:{{ .Tag }}-debian-slim-arm64
+  - name_template: "ghcr.io/kumahq/kuma-counter-demo:{{ .Major }}-debian-slim"
+    image_templates:
+      - ghcr.io/kumahq/kuma-counter-demo:{{ .Major }}-debian-slim-amd64
+      - ghcr.io/kumahq/kuma-counter-demo:{{ .Major }}-debian-slim-arm64
+  - name_template: "ghcr.io/kumahq/kuma-counter-demo:debian-slim"
+    image_templates:
+      - ghcr.io/kumahq/kuma-counter-demo:debian-slim-amd64
+      - ghcr.io/kumahq/kuma-counter-demo:debian-slim-arm64
 
 release:
   draft: true

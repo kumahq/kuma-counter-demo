@@ -27,6 +27,10 @@ clean:
 .PHONY: all
 all: check build test run
 
+.PHONY: release
+release:
+	$(GORELEASER) release --clean
+
 .PHONY: check
 check: tidy fmt lint
 
