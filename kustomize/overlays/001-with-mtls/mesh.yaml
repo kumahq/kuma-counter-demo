@@ -4,6 +4,8 @@ kind: Mesh
 metadata:
   name: default
 spec:
+  meshServices:
+    mode: Exclusive
   mtls:
     backends:
       - name: ca-1

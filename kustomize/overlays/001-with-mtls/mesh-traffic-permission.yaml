@@ -5,8 +5,8 @@ metadata:
   name: kv
 spec:
   targetRef:
-    kind: MeshSubset
-    tags:
+    kind: Dataplane
+    labels:
       app: kv
   from:
     - targetRef:

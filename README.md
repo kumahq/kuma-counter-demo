@@ -71,7 +71,7 @@ kubectl apply -k kustomize/overlays/001-with-mtls
 kubectl apply -k kustomize/overlays/002-with-gateway
 ```
 
-To apply these manifests directly you should have a running k8s cluster and Kuma already installed.
+To apply these manifests directly, you should have a running k8s cluster and Kuma already installed.
 
 ```shell
 helm install kuma kuma/kuma --create-namespace --namespace kuma-system

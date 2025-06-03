@@ -6,8 +6,8 @@ metadata:
   name: demo-app
 spec:
   targetRef:
-    kind: MeshSubset
-    tags:
+    kind: Dataplane
+    labels:
       app: demo-app
   from:
     - targetRef:
