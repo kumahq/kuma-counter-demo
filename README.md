@@ -106,13 +106,5 @@ To add delay to response you need to set header `x-set-response-delay-ms`. Examp
 curl localhost:5050/api/counter -XPOST -H "x-set-response-delay-ms: 5000"
 ```
 
-### Enforcing response status code
-
-To enforce response status code you need to set header `x-set-response-status-code`. Example:
-
-```shell
-curl localhost:5050/api/counter -XPOST -H "x-set-response-status-code: 503"
-```
-
 [kuma-url]: https://kuma.io/
 [kuma-logo]: https://kuma-public-assets.s3.amazonaws.com/kuma-logo-v2.png
