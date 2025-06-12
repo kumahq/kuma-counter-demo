@@ -1,6 +1,6 @@
 module github.com/kumahq/kuma-counter-demo
 
-go 1.23.2
+go 1.24.4
 
 require (
 	github.com/getkin/kin-openapi v0.127.0
