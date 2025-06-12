@@ -245,8 +245,8 @@ spec:
       tags:
         kuma.io/service: edge-gateway_kuma-demo_svc
   targetRef:
-    kind: MeshSubset
-    tags:
+    kind: Dataplane
+    labels:
       app: demo-app
 ---
 apiVersion: kuma.io/v1alpha1
@@ -264,6 +264,6 @@ spec:
         app: demo-app
         k8s.kuma.io/namespace: kuma-demo
   targetRef:
-    kind: MeshSubset
-    tags:
+    kind: Dataplane
+    labels:
       app: kv

@@ -189,10 +189,6 @@ metadata:
   name: kv
   namespace: kuma-demo
 spec:
-  targetRef:
-    kind: Dataplane
-    labels:
-      app: kv
   from:
   - default:
       action: Allow
@@ -201,3 +197,7 @@ spec:
       tags:
         app: demo-app
         k8s.kuma.io/namespace: kuma-demo
+  targetRef:
+    kind: Dataplane
+    labels:
+      app: kv
