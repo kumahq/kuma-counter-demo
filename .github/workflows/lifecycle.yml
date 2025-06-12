@@ -11,4 +11,4 @@ on:
 
 jobs:
   lifecycle:
-    uses: kumahq/.github/.github/workflows/wfc_lifecycle.yml@main
+    uses: kumahq/.github/.github/workflows/wfc_lifecycle.yml@2e670e4083642dfa8f047fab84c6436d28ef81a4

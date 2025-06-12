@@ -20,11 +20,11 @@ func main() {
 	_, _ = file.WriteString("This document provides a list of error codes used in the application.\n")
 
 	for _, err := range api.ErrorTypes {
-		_, _ = file.WriteString(fmt.Sprintf(`
+		_, _ = fmt.Fprintf(file, `
 ## %s
 
 %s
-`, err.Key, err.Description))
+`, err.Key, err.Description)
 	}
 
 	fmt.Println("README file generated: ERRORS.md")
