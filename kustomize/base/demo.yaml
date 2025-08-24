@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: app
-          image: ghcr.io/kumahq/kuma-counter-demo:latest
+          image: ghcr.io/kumahq/kuma-counter-demo:latest@sha256:daf8f5cffa10b576ff845be84e4e3bd5a8a6470c7e66293c5e03a148f08ac148
           env:
             - name: OTEL_SERVICE_NAME
               value: kv
@@ -66,7 +66,7 @@ spec:
     spec:
       containers:
         - name: app
-          image: ghcr.io/kumahq/kuma-counter-demo:latest
+          image: ghcr.io/kumahq/kuma-counter-demo:latest@sha256:daf8f5cffa10b576ff845be84e4e3bd5a8a6470c7e66293c5e03a148f08ac148
           env:
             - name: OTEL_SERVICE_NAME
               value: demo-app
@@ -104,7 +104,7 @@ spec:
     spec:
       containers:
         - name: demo-app
-          image: ghcr.io/kumahq/kuma-counter-demo:latest
+          image: ghcr.io/kumahq/kuma-counter-demo:latest@sha256:daf8f5cffa10b576ff845be84e4e3bd5a8a6470c7e66293c5e03a148f08ac148
           env:
             - name: OTEL_SERVICE_NAME
               value: demo-app

@@ -95,7 +95,7 @@ spec:
           valueFrom:
             fieldRef:
               fieldPath: metadata.labels['version']
-        image: ghcr.io/kumahq/kuma-counter-demo:latest
+        image: ghcr.io/kumahq/kuma-counter-demo:latest@sha256:daf8f5cffa10b576ff845be84e4e3bd5a8a6470c7e66293c5e03a148f08ac148
         name: app
         ports:
         - containerPort: 5050
@@ -133,7 +133,7 @@ spec:
           valueFrom:
             fieldRef:
               fieldPath: metadata.labels['version']
-        image: ghcr.io/kumahq/kuma-counter-demo:latest
+        image: ghcr.io/kumahq/kuma-counter-demo:latest@sha256:daf8f5cffa10b576ff845be84e4e3bd5a8a6470c7e66293c5e03a148f08ac148
         name: demo-app
         ports:
         - containerPort: 5050
@@ -164,7 +164,7 @@ spec:
           valueFrom:
             fieldRef:
               fieldPath: metadata.labels['version']
-        image: ghcr.io/kumahq/kuma-counter-demo:latest
+        image: ghcr.io/kumahq/kuma-counter-demo:latest@sha256:daf8f5cffa10b576ff845be84e4e3bd5a8a6470c7e66293c5e03a148f08ac148
         name: app
         ports:
         - containerPort: 5050
