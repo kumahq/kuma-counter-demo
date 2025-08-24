@@ -11,7 +11,10 @@
   ],
   "kubernetes": {
     "managerFilePatterns": [
-      "/k8s/.+\\.ya?ml$/"
+      "/^kustomize\\/.+\\.ya?ml$/"
+    ],
+    "ignorePaths": [
+      "/\\/kustomization.ya?ml$/"
     ]
   }
 }
