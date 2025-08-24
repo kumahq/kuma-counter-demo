@@ -1,0 +1,17 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "Kong/public-shared-renovate:backend",
+    "Kong/public-shared-renovate:makefile",
+    "kumahq/kuma//.renovate/mise",
+    "kumahq/kuma//.renovate/security"
+  ],
+  "baseBranchPatterns": [
+    "^main$"
+  ],
+  "kubernetes": {
+    "managerFilePatterns": [
+      "/k8s/.+\\.ya?ml$/"
+    ]
+  }
+}
