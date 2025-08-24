@@ -7,7 +7,7 @@
     "kumahq/kuma//.renovate/security"
   ],
   "baseBranchPatterns": [
-    "^main$"
+    "main"
   ],
   "kubernetes": {
     "managerFilePatterns": [
