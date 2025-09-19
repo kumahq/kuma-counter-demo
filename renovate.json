@@ -4,8 +4,7 @@
     ":configMigration",
     "customManagers:makefileVersions",
     "Kong/public-shared-renovate:backend",
-    "Kong/public-shared-renovate:security-extended(area/security,team:kuma-security-managers)",
-    "kumahq/kuma//.renovate/mise"
+    "Kong/public-shared-renovate:security-extended(area/security,team:kuma-security-managers)"
   ],
   "baseBranchPatterns": ["main"],
   "kubernetes": {
