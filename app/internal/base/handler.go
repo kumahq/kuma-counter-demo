@@ -6,6 +6,7 @@ import (
 	"github.com/kumahq/kuma-counter-demo/pkg/api"
 	"go.opentelemetry.io/otel/trace"
 	"log/slog"
+	"math/rand"
 	"net/http"
 	"strconv"
 	"sync"
@@ -41,6 +42,26 @@ func (s *ServerImpl) writeResponse(w http.ResponseWriter, r *http.Request, origi
 		statusStr := r.Header.Get("x-set-response-status-code")
 		if st, _ := strconv.Atoi(statusStr); st != 0 {
 			originalStatusCode = st
+		}
+	}
+	
+	// Handle fault injection via x-failure-percentage header
+	if originalStatusCode/100 < 4 { // Only inject faults for successful responses (2xx, 3xx)
+		failurePercentageStr := r.Header.Get("x-failure-percentage")
+		if failurePercentage, parseErr := strconv.Atoi(failurePercentageStr); parseErr == nil && failurePercentage > 0 {
+			if failurePercentage >= 100 || rand.Intn(100) < failurePercentage {
+				originalStatusCode = http.StatusInternalServerError
+				qType := api.INTERNAL_ERROR.QualifiedType()
+				span := trace.SpanFromContext(r.Context())
+				response = api.Error{
+					Type:     &qType,
+					Status:   http.StatusInternalServerError,
+					Instance: span.SpanContext().TraceID().String(),
+					Title:    fmt.Sprintf("Simulated failure (x-failure-percentage: %d%%)", failurePercentage),
+				}
+				err = fmt.Errorf("simulated failure with %d%% chance", failurePercentage)
+				slog.DebugContext(r.Context(), "injecting simulated failure", "failurePercentage", failurePercentage)
+			}
 		}
 	}
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
