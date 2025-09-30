@@ -41,32 +41,23 @@ func (s *ServerImpl) writeResponse(w http.ResponseWriter, r *http.Request, origi
 	if originalStatusCode/100 < 5 { // If the original status is 5xx ignore our override
 		statusStr := r.Header.Get("x-set-response-status-code")
 		if st, _ := strconv.Atoi(statusStr); st != 0 {
-			originalStatusCode = st
+			statusCode = st
 		}
-	}
-	
-	// Handle fault injection via x-failure-percentage header
-	if originalStatusCode/100 < 4 { // Only inject faults for successful responses (2xx, 3xx)
-		failurePercentageStr := r.Header.Get("x-failure-percentage")
-		if failurePercentage, parseErr := strconv.Atoi(failurePercentageStr); parseErr == nil && failurePercentage > 0 {
-			if failurePercentage >= 100 || rand.Intn(100) < failurePercentage {
-				originalStatusCode = http.StatusInternalServerError
-				qType := api.INTERNAL_ERROR.QualifiedType()
-				span := trace.SpanFromContext(r.Context())
-				response = api.Error{
-					Type:     &qType,
-					Status:   http.StatusInternalServerError,
-					Instance: span.SpanContext().TraceID().String(),
-					Title:    fmt.Sprintf("Simulated failure (x-failure-percentage: %d%%)", failurePercentage),
+		// Handle fault injection via x-failure-percentage header
+		if statusCode/100 < 4 { // Only inject faults for successful responses (2xx, 3xx)
+			failurePercentageStr := r.Header.Get("x-failure-percentage")
+			if failurePercentage, parseErr := strconv.Atoi(failurePercentageStr); parseErr == nil && failurePercentage > 0 {
+				if failurePercentage >= 100 || rand.Intn(100) < failurePercentage {
+					statusCode = http.StatusInternalServerError
+					err = fmt.Errorf("simulated failure with %d%% chance", failurePercentage)
 				}
-				err = fmt.Errorf("simulated failure with %d%% chance", failurePercentage)
-				slog.DebugContext(r.Context(), "injecting simulated failure", "failurePercentage", failurePercentage)
 			}
 		}
 	}
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.Header().Set("X-Demo-App-Version", s.version)
-	w.WriteHeader(originalStatusCode)
+	w.Header().Set("X-Original-Status-Code", strconv.Itoa(originalStatusCode))
+	w.WriteHeader(statusCode)
 	if err != nil {
 		slog.ErrorContext(r.Context(), "failed request with error", "err", err, "status", statusCode, "response", response)
 	} else {
