@@ -1,4 +1,5 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
     <title>Kuma Demo</title>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
@@ -299,7 +300,11 @@
         </div>
     </div>
 </div>
-<script type="text/javascript">
+<script type="module">
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+
+    mermaid.initialize({ startOnLoad: false });
+
     let running = false;
     const $status = $("#status");
     const $zone = $("#zone");
@@ -411,6 +416,8 @@
         $content.removeClass("hide");
         $status.addClass("error");
         $status.text("core error:" + error);
+    }).finally(() => {
+        mermaid.run();
     });
     $autoincrement.click(() => {
         if ($autoincrement.is(":checked")) {
@@ -443,9 +450,6 @@
         });
         running = false;
     });
-</script>
-<script type="module">
-    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
 </script>
 </body>
 </html>
