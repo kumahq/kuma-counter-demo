@@ -114,5 +114,20 @@ To enforce response status code you need to set header `x-set-response-status-co
 curl localhost:5050/api/counter -XPOST -H "x-set-response-status-code: 503"
 ```
 
+### Simulating failures with fault injection
+
+To simulate random failures you need to set header `x-failure-percentage` with a value between 0 and 100. A value of 0 (or missing header) means no failures, while 100 means always fail. Example:
+
+```shell
+# 50% chance of failure
+curl localhost:5050/api/counter -XPOST -H "x-failure-percentage: 50"
+
+# Always fail
+curl localhost:5050/api/version -H "x-failure-percentage: 100"
+
+# No failures (same as not setting the header)
+curl localhost:5050/api/version -H "x-failure-percentage: 0"
+```
+
 [kuma-url]: https://kuma.io/
 [kuma-logo]: https://kuma-public-assets.s3.amazonaws.com/kuma-logo-v2.png
