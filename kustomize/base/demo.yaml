@@ -1,4 +1,10 @@
 ---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: kv
+  namespace: kuma-demo
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -14,6 +20,7 @@ spec:
       labels:
         app: kv
     spec:
+      serviceAccountName: kv
       containers:
         - name: app
           image: ghcr.io/kumahq/kuma-counter-demo:latest@sha256:1472f3e1d7787a2a16af24f5deab7ab7e8316bb6076a8b42f634426d08cad0f8
@@ -44,6 +51,12 @@ spec:
       port: 5050
       targetPort: 5050
 ---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: demo-app
+  namespace: kuma-demo
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -64,6 +77,7 @@ spec:
         app: demo-app
         version: v1
     spec:
+      serviceAccountName: demo-app
       containers:
         - name: app
           image: ghcr.io/kumahq/kuma-counter-demo:latest@sha256:1472f3e1d7787a2a16af24f5deab7ab7e8316bb6076a8b42f634426d08cad0f8
@@ -102,6 +116,7 @@ spec:
         app: demo-app
         version: v2
     spec:
+      serviceAccountName: demo-app
       containers:
         - name: demo-app
           image: ghcr.io/kumahq/kuma-counter-demo:latest@sha256:1472f3e1d7787a2a16af24f5deab7ab7e8316bb6076a8b42f634426d08cad0f8
