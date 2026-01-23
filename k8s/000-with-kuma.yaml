@@ -6,6 +6,18 @@ metadata:
   name: kuma-demo
 ---
 apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: demo-app
+  namespace: kuma-demo
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: kv
+  namespace: kuma-demo
+---
+apiVersion: v1
 kind: Service
 metadata:
   name: demo-app
@@ -100,6 +112,7 @@ spec:
         ports:
         - containerPort: 5050
           name: http
+      serviceAccountName: demo-app
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -138,6 +151,7 @@ spec:
         ports:
         - containerPort: 5050
           name: http
+      serviceAccountName: demo-app
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -169,6 +183,7 @@ spec:
         ports:
         - containerPort: 5050
           name: http
+      serviceAccountName: kv
 ---
 apiVersion: kuma.io/v1alpha1
 kind: Mesh
