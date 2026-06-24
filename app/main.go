@@ -166,7 +166,7 @@ func run() (err error) {
 
 	r := mux.NewRouter()
 
-	swagger, err := api.GetSwagger()
+	swagger, err := api.GetSpec()
 	if err != nil {
 		return err
 	}
