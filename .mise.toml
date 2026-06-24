@@ -3,7 +3,7 @@ experimental = true # To enable installation of Go tools from source with mise.
 
 [tools]
 golangci-lint = '2.12.2'
-goreleaser = '2.15.4'
+goreleaser = '2.16.0'
 oapi-codegen = '2.6.0'
 skaffold = '2.20.0'
 kustomize = '5.8.1'
