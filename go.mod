@@ -3,7 +3,7 @@ module github.com/kumahq/kuma-counter-demo
 go 1.26.0
 
 require (
-	github.com/getkin/kin-openapi v0.149.0
+	github.com/getkin/kin-openapi v0.153.0
 	github.com/go-logr/logr v1.4.4
 	github.com/gorilla/mux v1.8.1
 	github.com/oapi-codegen/nethttp-middleware v1.2.0
@@ -32,8 +32,6 @@ require (
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.30.0 // indirect
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
-	github.com/oasdiff/yaml v0.1.1 // indirect
-	github.com/oasdiff/yaml3 v0.0.14 // indirect
 	github.com/prometheus/client_model v0.6.3 // indirect
 	github.com/prometheus/common v0.72.0 // indirect
 	github.com/prometheus/otlptranslator v1.0.0 // indirect
@@ -43,6 +41,7 @@ require (
 	go.opentelemetry.io/otel/log v1.47.0 // indirect
 	go.opentelemetry.io/otel/metric v1.47.0 // indirect
 	go.opentelemetry.io/proto/otlp v1.11.0 // indirect
+	go.yaml.in/yaml/v4 v4.0.0 // indirect
 	golang.org/x/net v0.59.0 // indirect
 	golang.org/x/sys v0.48.0 // indirect
 	golang.org/x/text v0.42.0 // indirect
